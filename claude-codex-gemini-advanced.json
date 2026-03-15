@@ -51,7 +51,7 @@
     {
       "id": "0ecc58b0-c147-470e-91de-1a45215541f6",
       "title": "Initialize Agent",
-      "content": "You are assigned to \"{agent_name}\" Agent role. \nYou sessionId is \"{session_id_short}\" session id must be used in all tools where it's requried.\nGet your profile (devchain_get_agent_by_name) by using the agent role name and execute its instructions",
+      "content": "You are assigned to \"{agent_name}\" Agent role.\nYour sessionId is \"{session_id_short}\" — use this in all tools where required.\n\nIMPORTANT — YOUR FIRST ACTION: Call devchain_get_agent_by_name(name=\"{agent_name}\") to load your SOP instructions. Read the returned instructions carefully and follow them for all subsequent work. Do not proceed with any other task until you have loaded and understood your SOP.",
       "version": 3,
       "tags": []
     },
@@ -202,7 +202,7 @@
         "id": "provider-gemini",
         "name": "gemini"
       },
-      "options": "--model gemini-2.5-pro --approval-mode plan",
+      "options": "--model gemini-2.5-pro --approval-mode yolo",
       "instructions": "[[prompt:Business Analyst — Requirements Validation SOP (v1.0)]]",
       "temperature": null,
       "maxTokens": null
@@ -520,6 +520,35 @@
         }
       },
       "delayMs": 0,
+      "cooldownMs": 60000,
+      "retryOnError": false,
+      "groupName": null,
+      "position": 0,
+      "priority": 0
+    },
+    {
+      "id": "2191a8d6-a139-4563-80b5-a37e57926bac",
+      "name": "Session Started - Load SOP",
+      "description": "After session starts, prompt agent to load its SOP instructions via MCP",
+      "enabled": true,
+      "eventName": "session.started",
+      "eventFilter": null,
+      "actionType": "send_agent_message",
+      "actionInputs": {
+        "text": {
+          "source": "custom",
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !"
+        },
+        "submitKey": {
+          "source": "custom",
+          "customValue": "Enter"
+        },
+        "immediate": {
+          "source": "custom",
+          "customValue": "true"
+        }
+      },
+      "delayMs": 15000,
       "cooldownMs": 60000,
       "retryOnError": false,
       "groupName": null,
