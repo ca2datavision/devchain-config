@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "b756e0bd-15f2-4e0e-aa6a-833d48ca2f62",
+  "title": "Automated QA — Test Suite Verification SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:automated-qa"
+  ]
+}

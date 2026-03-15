@@ -1,0 +1,12 @@
+{
+  "id": "9d8d8bec-8088-4176-8bc3-ae697b7af980",
+  "name": "AutomatedQAOpus",
+  "provider": {
+    "id": "provider-claude",
+    "name": "claude"
+  },
+  "options": "--model claude-opus-4-5 --dangerously-skip-permissions",
+  "instructions": "[[prompt:Automated QA — Test Suite Verification SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

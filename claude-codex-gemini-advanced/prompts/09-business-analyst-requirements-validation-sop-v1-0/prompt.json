@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "280cd4c9-012b-4c2c-b700-ec8abc5bb008",
+  "title": "Business Analyst — Requirements Validation SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:business-analyst"
+  ]
+}
