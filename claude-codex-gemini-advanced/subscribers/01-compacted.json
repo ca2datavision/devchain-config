@@ -2,14 +2,14 @@
   "id": "1e580c53-650c-41f7-ba49-0833a7788c25",
   "name": "Compacted",
   "description": null,
-  "enabled": false,
+  "enabled": true,
   "eventName": "watcher.conversation.compact_requestnotified",
   "eventFilter": null,
   "actionType": "send_agent_message",
   "actionInputs": {
     "text": {
       "source": "custom",
-      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nRe-load your agent profile to refresh SOP instructions and continue working"
+      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile to refresh SOP instructions\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName={your_agent_name})\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
     },
     "submitKey": {
       "source": "custom",

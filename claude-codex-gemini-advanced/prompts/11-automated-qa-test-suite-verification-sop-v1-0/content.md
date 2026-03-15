@@ -176,18 +176,29 @@ Post results using this format:
 ## 5) Finalize Testing
 
 ### If APPROVED (all suites green, coverage adequate):
+
+**Determine if Manual QA is needed:** Check the task description and parent epic. If the task involves user-facing changes (UI, new API endpoints consumed by a frontend, user flows, visual changes), route to Manual QA. Otherwise, mark Done directly.
+
+**User-facing task → route to Manual QA:**
+```
+devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with APPROVED verdict>\nRouting to Manual QA for acceptance/exploratory testing.")
+devchain_update_epic(task_id, {agentName: "Manual QA"})
+```
+
+**Non-user-facing task (pure backend, refactoring, infra) → mark Done:**
 ```
 devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with APPROVED verdict>")
 devchain_update_epic(task_id, {statusName: "Done"})
 ```
-Notify Epic Manager that automated QA is complete.
 
 ### If NEEDS FIXES:
+
+Read the task comments to identify which Coder implemented it. Reassign to that same Coder:
 ```
 devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with NEEDS FIXES verdict>")
-devchain_update_epic(task_id, {statusName: "In Progress", agentName: "Coder 1"})
+devchain_update_epic(task_id, {statusName: "In Progress", agentName: "<original Coder name>"})
 ```
-Reassign to a Coder. Include full error output and analysis.
+Include full error output and analysis so the Coder can fix without guessing.
 
 ---
 
@@ -200,6 +211,7 @@ Before posting verdict:
 - [ ] Missing tests written where needed
 - [ ] No regressions in existing tests
 - [ ] Test report follows template
+- [ ] Routing decision correct (Manual QA for user-facing, Done for non-user-facing)
 - [ ] Status updated correctly
 
 ---
@@ -211,6 +223,20 @@ Before posting verdict:
 * Do not perform manual/exploratory testing — that's Manual QA
 * Do not approve with failing tests — always require green suites
 * Do not skip test suites — run everything available
+
+---
+
+## 8) Context Recovery Protocol (Post-Compaction)
+
+When your context has been compacted or you receive a session recovery message:
+
+1. **Re-read this SOP** to refresh your operating instructions.
+2. **Reload your current work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
+3. **For each task in Review:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments — find the Coder's evidence and any prior QA attempts.
+4. **Resume testing** from where you left off. If you already posted a partial report, update it rather than duplicating.
+5. **Re-read project docs** if they exist (docs/development-standards.md) for test conventions.
+
+**Checkpoint discipline:** Post `STATUS: TESTING — <step>` comments as you progress (e.g., "build passed, running test suites"). These survive compaction.
 
 ---
 

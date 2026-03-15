@@ -236,8 +236,23 @@ For new Projects once you have Master Plan approval:
 
 ## 12) Final Notes
 
-* Prioritize clarity and verification in sub-epic descriptions 
+* Prioritize clarity and verification in sub-epic descriptions
 * Prefer more, smaller sub‑epics over one large, ambiguous item.
+
+---
+
+## 13) Context Recovery Protocol (Post-Compaction)
+
+When your context has been compacted or you receive a session recovery message:
+
+1. **Re-read this SOP** to refresh your operating instructions.
+2. **Reload your current work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
+3. **For any in-progress planning epic:** Run `devchain_get_epic_by_id(id)` and read ALL comments to see what validation stage you were at (SubBSM feedback, Business Analyst feedback, user approval status).
+4. **Check for pending messages** from SubBSM and Business Analyst — their feedback may have arrived during compaction.
+5. **Re-read project docs** if they exist (docs/) — you authored them, use them.
+6. **Resume** from where you left off — do not re-send validation requests if feedback has already arrived.
+
+**Checkpoint discipline:** Post status comments on the planning epic as you progress (e.g., "Draft plan sent to SubBSM + BA for validation", "Feedback received from SubBSM, awaiting BA", "Final plan ready for user review"). These survive compaction.
 
 ---
 
