@@ -1,0 +1,12 @@
+{
+  "id": "bdae60ed-17b4-49db-b64b-12d6adde1b66",
+  "name": "CodeGPT",
+  "provider": {
+    "id": "a4c87d4f-b0ec-40df-8f9d-56e4ca678fae",
+    "name": "codex"
+  },
+  "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
+  "instructions": "[[prompt:Worker AI — Task Execution SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "cd5ece2c-1101-4b16-8ee4-4e75d8d506fb",
+  "title": "Worker AI — Task Execution SOP (v1.0)",
+  "version": 5,
+  "tags": [
+    "agent:profile:coder"
+  ]
+}

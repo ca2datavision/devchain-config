@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "a1b2c3d4-5678-90ab-cdef-123456789abc",
+  "title": "Tester — QA Verification SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:tester"
+  ]
+}

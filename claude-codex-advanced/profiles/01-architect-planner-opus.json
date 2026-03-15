@@ -1,0 +1,12 @@
+{
+  "id": "e080616d-5091-4ef8-bbc1-0680d6d4b4d0",
+  "name": "Architect/Planner Opus",
+  "provider": {
+    "id": "provider-claude",
+    "name": "claude"
+  },
+  "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan",
+  "instructions": "[[prompt:Reviewer/Architect — Plan Decomposition SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

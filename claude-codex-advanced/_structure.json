@@ -1,0 +1,53 @@
+{
+  "topLevelKeys": [
+    {
+      "key": "_manifest",
+      "source": "manifest.json"
+    },
+    {
+      "key": "version",
+      "source": "config.json"
+    },
+    {
+      "key": "exportedAt",
+      "source": "config.json"
+    },
+    {
+      "key": "prompts",
+      "source": "prompts/"
+    },
+    {
+      "key": "profiles",
+      "source": "profiles/"
+    },
+    {
+      "key": "agents",
+      "source": "agents/"
+    },
+    {
+      "key": "statuses",
+      "source": "statuses.json"
+    },
+    {
+      "key": "initialPrompt",
+      "source": "config.json"
+    },
+    {
+      "key": "projectSettings",
+      "source": "config.json"
+    },
+    {
+      "key": "watchers",
+      "source": "watchers/"
+    },
+    {
+      "key": "subscribers",
+      "source": "subscribers/"
+    }
+  ],
+  "jsonFormat": {
+    "indent": 2,
+    "ensureAscii": false,
+    "trailingNewline": true
+  }
+}

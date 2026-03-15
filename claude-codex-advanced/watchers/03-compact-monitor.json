@@ -1,0 +1,17 @@
+{
+  "id": "f09bf0cc-fe48-47f1-837c-37d2efe5dbfc",
+  "name": "Compact monitor",
+  "description": null,
+  "enabled": true,
+  "scope": "provider",
+  "scopeFilterName": "claude",
+  "pollIntervalMs": 60000,
+  "viewportLines": 20,
+  "condition": {
+    "type": "contains",
+    "pattern": "Context low · Run /compact to compact & continue"
+  },
+  "cooldownMs": 160000,
+  "cooldownMode": "time",
+  "eventName": "watcher.conversation.compact_request"
+}

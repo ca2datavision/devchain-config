@@ -1,0 +1,12 @@
+{
+  "id": "012f14f3-caf9-4876-a82b-06a744125bf6",
+  "name": "CodeOpus",
+  "provider": {
+    "id": "provider-claude",
+    "name": "claude"
+  },
+  "options": "--model claude-opus-4-5 --dangerously-skip-permissions",
+  "instructions": "[[prompt:Worker AI — Task Execution SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

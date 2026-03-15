@@ -1,0 +1,12 @@
+{
+  "id": "f816e358-9c6c-4a98-9c32-e0580eb0e294",
+  "name": "SubAgent Architect/Planner (GPT)",
+  "provider": {
+    "id": "a4c87d4f-b0ec-40df-8f9d-56e4ca678fae",
+    "name": "codex"
+  },
+  "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
+  "instructions": "[[prompt:Code-Aware Technical Lead — SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}
