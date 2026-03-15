@@ -537,7 +537,7 @@
       "actionInputs": {
         "text": {
           "source": "custom",
-          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !"
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent id: {{agentId}}\n\n! Important: Load your SOP instructions NOW !\n1. Call devchain_list_agents() to get all agents\n2. Find YOUR agent name by matching your agent id ({{agentId}})\n3. Call devchain_get_agent_by_name(name=<your agent name>) to load your SOP\n4. Read and follow the returned SOP instructions for all subsequent work"
         },
         "submitKey": {
           "source": "custom",
