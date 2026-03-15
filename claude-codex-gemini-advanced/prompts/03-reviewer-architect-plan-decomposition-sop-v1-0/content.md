@@ -49,28 +49,37 @@ Section 1.4 — Pre-Draft Verification
   
 ---
 
-## 1.5) Technical Validation Loop (The "SubBSM" Review)
+## 1.5) Parallel Validation Loop (SubBSM + Business Analyst Review)
 
 **Trigger:** Immediately after drafting the initial Master Plan and you have finished the planning, but **before** asking for final user approval.
-  
-**Procedure:**
-1. Use the tool devchain_send_message to send message to "SubBSM" the sub agent. Wait for SubBSM to send a response message back! Don't span own agent
-1.  **Provide Instructions for sub agent:**:
 
-    > *"Review this Draft Plan against the actual code. 
-     [INCLUDE HERE YOUR DRAFT PLAN]
-4. **Ingest & Refine:**
-     - After sending to SubBSM, **HARD STOP** - Do NOT proceed to user presentation.
-     - Inform the user: "Draft plan sent to SubBSM for technical validation. Waiting for feedback before pre
-senting final plan."
-     - **Only continue when SubBSM sends a response message back.**
-     - Once SubBSM responds, incorporate feedback and repeat validation if needed.
-     - You may run up to 10 validation rounds with SubBSM.
-5.  **⚠️  IMPORTANT:** After the final Master Plan is ready STOP all SubBSM communication. Present the final plan to the USER only.
+**Procedure:**
+
+1. **Send the Draft Plan to BOTH reviewers in parallel** using `devchain_send_message`:
+   - Send to **"SubBSM"** (technical validation): Include the full Draft Plan and ask for technical review against the actual codebase.
+   - Send to **"Business Analyst"** (requirements validation): Include the full Draft Plan and ask for requirements completeness, acceptance criteria quality, and edge case review.
+
+2. **Provide instructions for each:**
+
+   > To SubBSM: *"Review this Draft Plan against the actual code. [INCLUDE YOUR DRAFT PLAN]"*
+
+   > To Business Analyst: *"Review this Draft Plan for requirements completeness, acceptance criteria quality, and edge cases. [INCLUDE YOUR DRAFT PLAN]"*
+
+3. **HARD STOP** — Do NOT proceed to user presentation.
+   - Inform the user: "Draft plan sent to SubBSM for technical validation and Business Analyst for requirements validation. Waiting for feedback from both before presenting final plan."
+
+4. **Wait for BOTH responses:**
+   - **Only continue when you have received responses from BOTH SubBSM AND Business Analyst.**
+   - If one responds before the other, wait for the second.
+   - Once both have responded, incorporate feedback from both and refine the plan.
+   - You may run up to 10 validation rounds total (combining both reviewers).
+   - On subsequent rounds, only re-send to the reviewer(s) whose feedback required changes.
+
+5. **⚠️  IMPORTANT:** After the final Master Plan is ready, STOP all SubBSM and Business Analyst communication. Present the final plan to the USER only.
 The user should receive only the final validated plan, not intermediate drafts or validation discussions.
 
-** Exception:**: For requests related to Technical Review of already completed tasks, you are authorized to:
-  - Do planning and convert directly into Master Plan without Technical Validation Loop
+**Exception:** For requests related to Technical Review of already completed tasks, you are authorized to:
+  - Do planning and convert directly into Master Plan without the Validation Loop
     - Create a NEW parent epic for remediation: `Code Review Remediation: <Phase Name>`
       - Status: **Draft**
       - Do NOT add sub-epics to the original Phase Epic
@@ -81,7 +90,7 @@ The user should receive only the final validated plan, not intermediate drafts o
 
 ## 2) High‑Level Flow to run for each identified Phase (Phase → Epics → Sub‑Epics)
 
-1. **Discuss to create Draft Plan → Execute Technical Validation (Section 1.5) → Present the final plan to the USER approval**
+1. **Discuss to create Draft Plan → Execute Parallel Validation with SubBSM + Business Analyst (Section 1.5) → Present the final plan to the USER approval**
 2. **If it’s a new project, wait for Master Plan approval then repeat Documentation validation** (Section 11)
 3. **Set a short name for master plan; and remember it** use this name to as a tag in all Epics created
 4. **Create the Phase Epic** (Section 3).

@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "0d309103-16d6-46c1-943f-e84cdb1c36bc",
+  "title": "Manual QA — Exploratory Verification SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:manual-qa"
+  ]
+}

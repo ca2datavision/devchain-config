@@ -1,0 +1,12 @@
+{
+  "id": "3a9df2bd-4641-4c40-a7f1-4173dcc9b553",
+  "name": "Business Analyst (Gemini)",
+  "provider": {
+    "id": "provider-gemini",
+    "name": "gemini"
+  },
+  "options": "--model gemini-2.5-pro --approval-mode plan",
+  "instructions": "[[prompt:Business Analyst — Requirements Validation SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}
