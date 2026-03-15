@@ -1,0 +1,29 @@
+{
+  "id": "2191a8d6-a139-4563-80b5-a37e57926bac",
+  "name": "Session Started - Load SOP",
+  "description": "After session starts, prompt agent to load its SOP instructions via MCP",
+  "enabled": true,
+  "eventName": "session.started",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    },
+    "immediate": {
+      "source": "custom",
+      "customValue": "true"
+    }
+  },
+  "delayMs": 15000,
+  "cooldownMs": 60000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 0
+}

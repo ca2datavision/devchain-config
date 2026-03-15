@@ -5,7 +5,7 @@
     "id": "provider-gemini",
     "name": "gemini"
   },
-  "options": "--model gemini-2.5-pro --approval-mode plan",
+  "options": "--model gemini-2.5-pro --approval-mode yolo",
   "instructions": "[[prompt:Business Analyst — Requirements Validation SOP (v1.0)]]",
   "temperature": null,
   "maxTokens": null
