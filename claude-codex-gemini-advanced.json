@@ -429,7 +429,7 @@
       "actionInputs": {
         "text": {
           "source": "custom",
-          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile to refresh SOP instructions\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName={your_agent_name})\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile: devchain_get_agent_by_name(name='{{agentName}}')\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName='{{agentName}}')\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
         },
         "submitKey": {
           "source": "custom",
@@ -483,7 +483,7 @@
       "actionInputs": {
         "text": {
           "source": "custom",
-          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile to refresh SOP instructions\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName={your_agent_name})\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile: devchain_get_agent_by_name(name='{{agentName}}')\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName='{{agentName}}')\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
         },
         "submitKey": {
           "source": "custom",
