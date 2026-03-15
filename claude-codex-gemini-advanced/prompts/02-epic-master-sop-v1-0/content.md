@@ -83,7 +83,7 @@ You coordinate a multi-agent team. Know who does what:
      d) IF NO NEW parent epics remain → proceed to step 7
 
 7. ONLY after confirming no NEW epics (status=NEW, agentName={agent_name | empty} ) exist: request code review, use devchain_list_agents to identify the agent responsible for code review and send him a message to review the completed all epics.
-8. **After code review completes** and no `New`, `In Progress`, `Review`, or `QA` tasks remain → run **Backlog Review** (Section 6.1).
+8. **After code review completes** and no `New`, `In Progress`, `Review`, or `QA` tasks remain → run **Backlog Review** (Section 6.2).
 
 ## End of Project Flow
 
@@ -212,7 +212,19 @@ Upon receiving a notification of a **newly assigned task**:
    - Continue assigning subsequent sub-epics as Coders complete their current tasks (see Section 1.1 load-balancing rules).
 5. Do nothing for other states of the assigned tasks
 
-### 6.1) Backlog Review (Capacity-Triggered)
+### 6.1) Coder Availability (Message-Triggered)
+
+When a Coder sends a message saying they are available for new assignments:
+
+1. **Check for unassigned sub-epics** under your in-progress parent epics:
+   - Look for sub-epics in `New` status with no `agentName` assigned.
+   - If found → assign to the requesting Coder (set status `In Progress`).
+2. **If no unassigned sub-epics exist**, check for sub-epics in `Draft` or parent epics in `New`/`Draft`:
+   - If a `Draft` sub-epic is ready → move to `New` and assign to the requesting Coder.
+   - If a parent epic in `New` exists → assign to yourself, set `In Progress`, and assign its first sub-epic to the requesting Coder.
+3. **If no work at all** → acknowledge the Coder's message. The Coder will be assigned work when new tasks arrive or when backlog review produces new phases.
+
+### 6.2) Backlog Review (Capacity-Triggered)
 
 **Trigger:** Run this when no `New`, `In Progress`, `Review`, or `QA` tasks exist — the team has capacity.
 

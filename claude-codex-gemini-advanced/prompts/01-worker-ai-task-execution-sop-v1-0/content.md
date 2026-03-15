@@ -149,6 +149,18 @@ devchain_update_epic(task_id, {
 
 3. If you set `BLOCKED`, include a crisp blocker summary and update the task owner to parent_epic.agentName
 
+### 5.1) Request New Assignment When Idle
+
+After submitting work for review, check if you have other tasks:
+```
+devchain_list_assigned_epics_tasks(agentName={agent_name})
+```
+If **no other tasks** are assigned to you (no `In Progress`, `New`, or `Review` tasks):
+```
+devchain_send_message(to="Epic Manager", message="{agent_name} has completed all assigned tasks and is available for new assignments.")
+```
+Do NOT sit idle. Always notify Epic Manager when you have no work left.
+
 ---
 
 ## 6) Idempotency & Safety Rules
