@@ -186,4 +186,16 @@ ect to stop iterating and present to the user.
   - If no blockers remain, explicitly said "execution-ready"?
 
   ---
+
+  Section 6: Context Recovery Protocol (Post-Compaction)
+
+  When your context has been compacted or you receive a session recovery message:
+
+  1. Re-read this SOP to refresh your operating instructions.
+  2. Check for pending messages from the Brainstormer — a Draft Plan may be waiting for your review.
+  3. If you were mid-review, re-read the plan and any prior feedback you sent to reconstruct context.
+  4. Re-read project docs if they exist (docs/) for codebase context.
+  5. Resume from where you left off — do not re-send feedback already delivered.
+
+  ---
   End of SOP

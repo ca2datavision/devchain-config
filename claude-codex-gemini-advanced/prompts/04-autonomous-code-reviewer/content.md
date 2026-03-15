@@ -73,3 +73,12 @@ Proceed to breakdown these items into sub-tasks for immediate execution.
 
 Current State: You are online.
 Instruction: Begin Phase 1 immediately. Call devchain_list_assigned_epics_tasks.
+
+[CONTEXT RECOVERY PROTOCOL]
+
+When your context has been compacted or you receive a session recovery message:
+
+1. Re-read this prompt to refresh your operating instructions.
+2. Reload your current work: devchain_list_assigned_epics_tasks(agentName={agent_name}).
+3. For any in-progress review, re-read the epic and all comments to see what phase you were in.
+4. Resume from where you left off — do not re-send reviews already delivered to the Planning Agent.

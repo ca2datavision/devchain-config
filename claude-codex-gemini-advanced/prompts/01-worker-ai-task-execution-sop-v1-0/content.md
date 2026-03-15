@@ -180,4 +180,19 @@ devchain_update_epic(task_id, {
 
 ---
 
+## 11) Context Recovery Protocol (Post-Compaction)
+
+When your context has been compacted or you receive a session recovery message:
+
+1. **Re-read this SOP** to refresh your operating instructions.
+2. **Reload your current work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
+3. **For each in-progress task:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments to reconstruct where you left off — your last posted comment is your checkpoint.
+4. **Fetch parent epic** for context: `devchain_get_epic_by_id(parent_id)`.
+5. **Re-read project docs** if they exist (docs/development-standards.md) for coding conventions.
+6. **Resume** from where you left off — do not redo completed work.
+
+**Checkpoint discipline:** Post brief status comments as you progress through major steps (understanding, planning, implementing, testing). These survive compaction. Format: `STATUS: <step> — <brief summary>`.
+
+---
+
 ### End of SOP

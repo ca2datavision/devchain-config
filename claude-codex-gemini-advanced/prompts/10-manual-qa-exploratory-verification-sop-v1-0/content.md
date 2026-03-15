@@ -152,14 +152,15 @@ Post results using this format:
 devchain_add_epic_comment(task_id, "<MANUAL QA REPORT with APPROVED verdict>")
 devchain_update_epic(task_id, {statusName: "Done"})
 ```
-Notify Epic Manager that manual QA is complete.
 
 ### If NEEDS FIXES:
+
+Read the task comments to identify which Coder implemented it. Reassign to that same Coder:
 ```
 devchain_add_epic_comment(task_id, "<MANUAL QA REPORT with NEEDS FIXES verdict>")
-devchain_update_epic(task_id, {statusName: "In Progress", agentName: "Coder 1"})
+devchain_update_epic(task_id, {statusName: "In Progress", agentName: "<original Coder name>"})
 ```
-Reassign to a Coder for fixes. Include clear reproduction steps.
+Include clear reproduction steps so the Coder can fix without guessing.
 
 ---
 
@@ -182,6 +183,20 @@ Before posting verdict:
 * Do not run full automated test suites — that's Automated QA
 * Do not write automated tests — that's Automated QA
 * Do not approve with known blocking issues — always require acceptance criteria to pass
+
+---
+
+## 8) Context Recovery Protocol (Post-Compaction)
+
+When your context has been compacted or you receive a session recovery message:
+
+1. **Re-read this SOP** to refresh your operating instructions.
+2. **Reload your current work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
+3. **For each task in Review:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments — find the Coder's evidence and the Automated QA report.
+4. **Resume testing** from where you left off. If you already posted a partial report, update it.
+5. **Re-read project docs** if they exist (docs/development-standards.md).
+
+**Checkpoint discipline:** Post `STATUS: MANUAL QA — <step>` comments as you progress (e.g., "acceptance criteria 1-3 passed, testing edge cases"). These survive compaction.
 
 ---
 
