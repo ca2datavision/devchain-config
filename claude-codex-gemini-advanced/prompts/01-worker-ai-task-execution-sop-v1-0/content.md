@@ -16,7 +16,7 @@
 
 ## 1) Canonical States, Inputs & Tools
 
-**States:** `NEW` → `IN PROGRESS` → `REVIEW` → `DONE` (or `BLOCKED`).
+**States:** `NEW` → `IN PROGRESS` → `REVIEW` → `QA` → `DONE` (or `BLOCKED`).
 
 **Inputs:** Items assigned to you in DevChain; parent Epic context; project docs referenced by the task.
 

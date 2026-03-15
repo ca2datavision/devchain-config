@@ -8,10 +8,7 @@
   "projectSettings": {
     "initialPromptTitle": "Initialize Agent",
     "autoCleanStatusLabels": [
-      "Draft",
-      "Archive",
-      "Backlog",
-      "Done"
+      "Archive"
     ],
     "epicAssignedTemplate": "[Epic Assignment]\n{epic_title} is now assigned to {agent_name} in {project_name}. (Epic ID: {epic_id})"
   }
