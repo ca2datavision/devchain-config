@@ -27,7 +27,7 @@
   * Never use `devchain_send_message` as a notification for assignments. When agentName is updated on epic/task a notification is sent automatically.
   * Use devchain_send_message for other communication purposes with other agents.
   * (Optional) Git viewer to inspect file diffs, commits, and change scope.
-* **States vocabulary (canonical):** `New` → `In Progress` → `Review` → `Done` (or `Blocked`).
+* **States vocabulary (canonical):** `Backlog` → `Draft` → `New` → `In Progress` → `Review` → `QA` → `Done` (or `Blocked`). Side: `Archive`.
 * **Always** be deterministic: follow the steps in order; never skip required checks.
 * **Be concise:** Suggestions must be important, non‑trivial, and avoid over‑engineering.
 * **Idempotency:** Re‑running the same step should not change outcomes unless inputs changed.
@@ -83,8 +83,21 @@ You coordinate a multi-agent team. Know who does what:
      d) IF NO NEW parent epics remain → proceed to step 7
 
 7. ONLY after confirming no NEW epics (status=NEW, agentName={agent_name | empty} ) exist: request code review, use devchain_list_agents to identify the agent responsible for code review and send him a message to review the completed all epics.
+8. **After code review completes** and no `New`, `In Progress`, `Review`, or `QA` tasks remain → run **Backlog Review** (Section 6.1).
 
 ## End of Project Flow
+
+### 2.1) Draft Activation
+
+Epics in `Draft` status are visible to you. When you encounter them:
+
+1. **Check if the epic is ready for work:** Read its description and sub-epics.
+   - If the description has `🚀 TODO WORK DETAILS` and acceptance criteria → it's ready.
+   - Move to `New` and assign to yourself or a Coder per routing rules (Section 1.1).
+2. **If the epic is incomplete** (missing details, no sub-epics, vague requirements):
+   - Send to **Brainstormer** via `devchain_send_message` asking for decomposition.
+   - Keep status `Draft` until Brainstormer processes it.
+3. **Do not ignore Draft epics.** They exist because someone created them — they deserve attention.
 ---
 
 ## 3) Review Process (for Sub‑Epics in `Review`)
@@ -147,9 +160,9 @@ Decide **only** on the basis of compliance with `🚀 WORK DETAILS` (original sc
 1. Add comment message:
 
    > `STATUS: IMPLEMENTATION APPROVED. Routing to QA for verification. Backlog has been updated with any new findings (if any).`
-2. Assign the Sub‑Epic to **Automated QA** (keep status `Review`):
+2. Assign the Sub‑Epic to **Automated QA** and set status to `QA`:
    ```
-   devchain_update_epic(sub_epic_id, {agentName: "Automated QA"})
+   devchain_update_epic(sub_epic_id, {statusName: "QA", agentName: "Automated QA"})
    ```
    Automated QA will run tests/builds and either:
    - Mark `Done` (for non-user-facing tasks) or chain to Manual QA (for user-facing tasks).
@@ -191,12 +204,29 @@ Upon receiving a notification of a **newly assigned task**:
 
 1. Fetch details: `devchain_get_epic_by_id(id)`.
 2. If the task is in `Review`, immediately run **Section 3**.
-3. If task is New/Draft and all sub epics are also New, nobody is working yet:
+3. If task is in `Draft`, follow **Section 2.1 (Draft Activation)**.
+4. If task is New and all sub epics are also New, nobody is working yet:
    - Assign the parent epic to your name and move into `In Progress`.
    - Assign the **first two** sub-epics to **Coder 1** and **Coder 2** respectively for parallel execution (set status `In Progress`).
    - If there is only one sub-epic, assign to **Coder 1**.
    - Continue assigning subsequent sub-epics as Coders complete their current tasks (see Section 1.1 load-balancing rules).
-4. Do nothing for other states of the assigned tasks
+5. Do nothing for other states of the assigned tasks
+
+### 6.1) Backlog Review (Capacity-Triggered)
+
+**Trigger:** Run this when no `New`, `In Progress`, `Review`, or `QA` tasks exist — the team has capacity.
+
+1. List backlog items: `devchain_list_epics(statusName=Backlog)`.
+2. If backlog is empty → nothing to do.
+3. If backlog has items, **triage** them:
+   - **Read each item** — understand severity, business value, and effort.
+   - **Group related items** that could form a coherent phase.
+   - **Discard obsolete items** — if a backlog item was already addressed by later work, move it to `Archive` with a comment explaining why.
+4. For actionable backlog items:
+   - Send the grouped items to **Brainstormer** via `devchain_send_message`:
+     > "The team has capacity. These backlog items are ready for planning: [list items with IDs and summaries]. Please review and create a plan if appropriate."
+   - The Brainstormer will run the planning flow (with SubBSM + BA validation) and create new phase epics.
+5. **Do NOT self-assign backlog items directly.** They must go through the planning process to get proper decomposition, validation, and acceptance criteria.
 
 ---
 

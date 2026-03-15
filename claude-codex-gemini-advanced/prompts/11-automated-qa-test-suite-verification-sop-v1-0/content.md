@@ -54,13 +54,12 @@
 ## 2) Test Intake
 
 1. Check for assigned work: `devchain_list_assigned_epics_tasks(agentName={agent_name})`
-2. For tasks in `Review` status assigned to you:
+2. For tasks in `QA` status assigned to you:
    a. Fetch details: `devchain_get_epic_by_id(task_id)`
    b. Read the Coder's evidence comment to understand what changed
    c. Fetch parent epic for context: `devchain_get_epic_by_id(parent_id)`
-3. Set status to `In Progress`:
+3. Keep status `QA` and start testing:
    ```
-   devchain_update_epic(task_id, {statusName: "In Progress"})
    devchain_add_epic_comment(task_id, "STATUS: AUTOMATED QA STARTED")
    ```
 
