@@ -1,0 +1,17 @@
+{
+  "id": "83e8035a-7a0c-4927-813c-852df906e5a2",
+  "name": "Limit reached",
+  "description": null,
+  "enabled": true,
+  "scope": "provider",
+  "scopeFilterName": "claude",
+  "pollIntervalMs": 60000,
+  "viewportLines": 50,
+  "condition": {
+    "type": "contains",
+    "pattern": "Limit reached · resets"
+  },
+  "cooldownMs": 1200000,
+  "cooldownMode": "time",
+  "eventName": "watcher.claude.limit_reached"
+}

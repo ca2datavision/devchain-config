@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "5e126430-2936-4828-b212-23324057dfa4",
+  "title": "Epic Master — SOP(v1.0)",
+  "version": 8,
+  "tags": [
+    "agent:profile:epic-master"
+  ]
+}

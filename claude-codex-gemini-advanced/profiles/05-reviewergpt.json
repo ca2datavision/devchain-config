@@ -1,0 +1,12 @@
+{
+  "id": "72e79b1e-a150-417f-9a20-170f96f6f4b0",
+  "name": "ReviewerGPT",
+  "provider": {
+    "id": "a4c87d4f-b0ec-40df-8f9d-56e4ca678fae",
+    "name": "codex"
+  },
+  "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
+  "instructions": "[[prompt:Epic Master — SOP(v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

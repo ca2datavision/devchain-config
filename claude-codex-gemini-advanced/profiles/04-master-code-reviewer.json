@@ -1,0 +1,12 @@
+{
+  "id": "4a9caab1-55a4-4a6b-853d-e2a1b9d996e2",
+  "name": "Master Code Reviewer",
+  "provider": {
+    "id": "a4c87d4f-b0ec-40df-8f9d-56e4ca678fae",
+    "name": "codex"
+  },
+  "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
+  "instructions": "[[prompt:Autonomous Code Reviewer]]",
+  "temperature": null,
+  "maxTokens": null
+}

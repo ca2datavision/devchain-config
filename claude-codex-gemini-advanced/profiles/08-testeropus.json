@@ -1,0 +1,12 @@
+{
+  "id": "b2c3d4e5-6789-0abc-def1-234567890def",
+  "name": "TesterOpus",
+  "provider": {
+    "id": "provider-claude",
+    "name": "claude"
+  },
+  "options": "--model claude-opus-4-5 --dangerously-skip-permissions",
+  "instructions": "[[prompt:Tester — QA Verification SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

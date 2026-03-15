@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "60ccbb3f-1010-4ee8-87c8-868b4c5e41dd",
+  "title": "Initialize project documentation",
+  "version": 1,
+  "tags": [
+    "docs:create-docs"
+  ]
+}

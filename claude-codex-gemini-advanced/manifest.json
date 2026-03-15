@@ -1,0 +1,12 @@
+{
+  "slug": "claude-codex-advanced",
+  "name": "Claude&Codex",
+  "description": "A multi-agent development workflow that automates software delivery through three phases:\n\n1. Planning — A Brainstormer agent collaborates with a technical validator (SubBSM) to refine user requirements into an approved master plan, then breaks it down into epics and tasks.\n2. Execution — A Coder agent implements tasks while an Epic Manager reviews and controls the flow—approving, revising, or flagging issues until all work is complete.\n3. Code Review — A Code Reviewer audits the completed work against architectural standards, generating findings that feed back into new remediation tasks if needed.",
+  "version": "1.0.0",
+  "minDevchainVersion": "0.4.0",
+  "category": "development",
+  "tags": [],
+  "authorName": "",
+  "changelog": "",
+  "publishedAt": "2025-12-29T21:26:06.854Z"
+}

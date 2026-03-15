@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "1b9771e1-5847-4feb-8a32-b95048272668",
+  "title": "Reviewer/Architect — Plan Decomposition SOP (v1.0)",
+  "version": 5,
+  "tags": [
+    "agent:profile:architect"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "0dc80b5b-475d-40d0-af3c-dfd88c483b3c",
+  "title": "Development Standards",
+  "version": 1,
+  "tags": [
+    "docs:create-development-standards"
+  ]
+}

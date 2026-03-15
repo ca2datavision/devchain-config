@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "c954192c-92d1-4840-b928-b0bccebc3530",
+  "title": "Code-Aware Technical Lead — SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:sub-architect"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "0ecc58b0-c147-470e-91de-1a45215541f6",
+  "title": "Initialize Agent",
+  "version": 3,
+  "tags": []
+}

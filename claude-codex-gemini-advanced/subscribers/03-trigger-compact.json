@@ -1,0 +1,25 @@
+{
+  "id": "a1f6135b-fba7-4b1d-8e5c-ac17e2690189",
+  "name": "Trigger Compact",
+  "description": null,
+  "enabled": true,
+  "eventName": "watcher.conversation.compact_request",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nRe-load your agent profile to refresh SOP instructions and continue working"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    }
+  },
+  "delayMs": 30000,
+  "cooldownMs": 60000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 1,
+  "priority": 0
+}
