@@ -86,9 +86,11 @@ You coordinate a multi-agent team. Know who does what:
      a) `devchain_list_epics(statusName=In Progress)` — any parent epics with unfinished sub-epics? → REPEAT from step 2.
      b) `devchain_list_epics(statusName=New)` — any `New` parent epics? → assign to yourself, set `In Progress`, assign sub-epics to Coders, REPEAT from step 2.
      c) `devchain_list_epics(statusName=Draft)` — any `Draft` parent epics? → run **Draft Activation** (Section 2.1), then REPEAT from step 2.
-     d) `devchain_list_epics(statusName=Backlog)` — any `Backlog` items? → run **Backlog Review** (Section 6.3) to send them through planning, then REPEAT from step 2 when new epics arrive.
+     d) `devchain_list_epics(statusName=Backlog)` — any `Backlog` items? → **always** run **Backlog Review** (Section 6.3). No shortcuts — do NOT skip triage or self-classify items as "empty." Section 6.3 handles archiving obsolete items. REPEAT from step 2 when new epics arrive from planning.
      e) ONLY when **all of the above return empty** → proceed to step 8.
-8. ONLY after confirming **no** epics in `New`, `Draft`, `In Progress`, `Review`, `QA`, or `Backlog` exist: request code review — use devchain_list_agents to identify the agent responsible for code review and send a message to review **only newly completed epics that have not been code-reviewed yet**. Check epic comments for prior code review reports — if an epic was already reviewed, skip it.
+8. Check for parent epics awaiting code review: `devchain_list_epics(statusName=Review)`.
+   - If parent epics in `Review` exist → request code review. Use devchain_list_agents to find the Code Reviewer and send a message listing ONLY the epic IDs in `Review` status.
+   - If NO epics in `Review` → skip code review entirely. Do NOT scan `Done` epics — they have already been through the full pipeline.
 9. **After code review completes** → REPEAT from step 7. Code review may generate remediation epics or backlog items — always re-check all statuses before concluding.
 10. **NEVER declare the project "done" or go idle.** Always loop back to step 7. The project is only idle when step 7a–7d ALL return empty AND step 8 has no unreviewed epics. Even then, wait for incoming messages (QA completion, Coder availability, new assignments) — do NOT terminate.
 
