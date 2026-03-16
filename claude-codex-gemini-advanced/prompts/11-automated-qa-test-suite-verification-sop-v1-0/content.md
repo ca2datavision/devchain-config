@@ -188,6 +188,7 @@ devchain_update_epic(task_id, {agentName: "Manual QA"})
 ```
 devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with APPROVED verdict>")
 devchain_update_epic(task_id, {statusName: "Done"})
+devchain_send_message(to="Epic Manager", message="QA COMPLETE: Task '{task_title}' (ID: {task_id}) — APPROVED and marked Done. Parent epic may be ready for completion check.")
 ```
 
 ### If NEEDS FIXES:
@@ -198,6 +199,14 @@ devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with NEEDS FIXES verdic
 devchain_update_epic(task_id, {statusName: "In Progress", agentName: "<original Coder name>"})
 ```
 Include full error output and analysis so the Coder can fix without guessing.
+
+### After ANY finalization (APPROVED or NEEDS FIXES):
+
+Always notify Epic Manager so the workflow continues:
+```
+devchain_send_message(to="Epic Manager", message="{agent_name} has completed QA on task '{task_title}' (ID: {task_id}). Verdict: <APPROVED/NEEDS FIXES>. Ready for next assignment.")
+```
+Do NOT sit idle without notifying Epic Manager.
 
 ---
 
