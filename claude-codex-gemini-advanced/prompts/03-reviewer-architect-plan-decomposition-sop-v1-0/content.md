@@ -77,16 +77,18 @@ Section 1.4 — Pre-Draft Verification
 
 5. **⚠️  IMPORTANT:** After the final Master Plan is ready, STOP all SubBSM and Business Analyst communication. Present the final plan for approval:
    - **If the plan was requested by the user** → present to the USER for approval.
-   - **If the plan was requested by Epic Manager** (e.g., backlog items) → send the final plan to **Epic Manager** via `devchain_send_message` for approval. Do NOT wait for user input — the EM is authorized to approve and execute backlog-originated plans autonomously.
+   - **If the plan was requested by Epic Manager** (e.g., backlog items) → send the final plan to **Epic Manager** via `devchain_send_message` for approval. Include structured metadata: `{message_type: "plan_for_approval", plan_type: "backlog_plan", source_backlog_item_ids: [<IDs of backlog items this plan addresses>], plan_content: "<the plan>"}`. Do NOT wait for user input — the EM is authorized to approve and execute backlog-originated plans autonomously.
+   - After EM approves and you create the phase epics, send a self-contained confirmation to EM: `{message_type: "creation_confirmation", plan_type: "backlog_plan", source_backlog_item_ids: [<same IDs>], created_epic_ids: [<IDs of epics created>]}`.
    - In both cases, the recipient should receive only the final validated plan, not intermediate drafts or validation discussions.
 
 **Exception:** For requests related to Technical Review of already completed tasks, you are authorized to:
   - Do planning and convert directly into Master Plan without the Validation Loop
     - Create a NEW parent epic for remediation: `Code Review Remediation: <Phase Name>`
       - Status: **Draft**
+      - Tag with `remediates:<originalParentEpicId>` (the epic that was code-reviewed)
       - Do NOT add sub-epics to the original Phase Epic
     - Decompose findings into sub-epics(**New** status) under this new remediation epic
-    - Don't send notification anyone
+    - Send confirmation to **Epic Manager** via `devchain_send_message`: `{message_type: "creation_confirmation", plan_type: "remediation_plan", created_epic_ids: [<remediation epic IDs>]}`
 
 ---
 
