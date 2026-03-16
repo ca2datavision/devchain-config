@@ -86,13 +86,11 @@ You coordinate a multi-agent team. Know who does what:
      a) `devchain_list_epics(statusName=In Progress)` — any parent epics with unfinished sub-epics? → REPEAT from step 2.
      b) `devchain_list_epics(statusName=New)` — any `New` parent epics? → assign to yourself, set `In Progress`, assign sub-epics to Coders, REPEAT from step 2.
      c) `devchain_list_epics(statusName=Draft)` — any `Draft` parent epics? → run **Draft Activation** (Section 2.1), then REPEAT from step 2.
-     d) `devchain_list_epics(statusName=Backlog)` — any `Backlog` items? → **always** run **Backlog Review** (Section 6.3). No shortcuts — do NOT skip triage or self-classify items as "empty." Section 6.3 handles archiving obsolete items. REPEAT from step 2 when new epics arrive from planning.
-     e) ONLY when **all of the above return empty** → proceed to step 8.
-8. Check for parent epics awaiting code review: `devchain_list_epics(statusName=Review)`.
-   - If parent epics in `Review` exist → request code review. Use devchain_list_agents to find the Code Reviewer and send a message listing ONLY the epic IDs in `Review` status.
-   - If NO epics in `Review` → skip code review entirely. Do NOT scan `Done` epics — they have already been through the full pipeline.
-9. **After code review completes** → REPEAT from step 7. Code review may generate remediation epics or backlog items — always re-check all statuses before concluding.
-10. **NEVER declare the project "done" or go idle.** Always loop back to step 7. The project is only idle when step 7a–7d ALL return empty AND step 8 has no unreviewed epics. Even then, wait for incoming messages (QA completion, Coder availability, new assignments) — do NOT terminate.
+     d) `devchain_list_epics(statusName=Review)` — any parent epics awaiting code review? → For each, check its tags. **Only dispatch** if the epic does NOT have the `code-review-pending` tag. When dispatching: add tag `code-review-pending` (`devchain_update_epic(id, {addTags:["code-review-pending"]})`), add comment `STATUS: CODE REVIEW REQUESTED`, and send to Code Reviewer (use `devchain_list_agents` to find them). Do NOT wait for review to finish — continue to step 7e.
+     e) `devchain_list_epics(statusName=Backlog)` — any `Backlog` items? → **always** run **Backlog Review** (Section 6.3). No shortcuts — do NOT skip triage or self-classify items as "empty." Section 6.3 handles archiving obsolete items.
+     f) ONLY when steps 7a–7e ALL return empty (no `In Progress`, `New`, `Draft`, `Review`, or `Backlog` epics) → wait for incoming messages. Do NOT terminate.
+8. **After code review completes** → handle via **Section 6.4 (Code Review Completion)**, then REPEAT from step 7. Code review may generate remediation epics — always re-check all statuses before concluding.
+9. **NEVER declare the project "done" or go idle.** Always loop back to step 7. Even when steps 7a–7e all return empty, wait for incoming messages (QA completion, Coder availability, code review results, new assignments) — do NOT terminate.
 
 ### 2.1) Draft Activation
 
@@ -245,19 +243,49 @@ When a Coder sends a message saying they are available for new assignments:
 
 ### 6.3) Backlog Review (Capacity-Triggered)
 
-**Trigger:** Run this when no `New`, `In Progress`, `Review`, or `QA` tasks exist — the team has capacity.
+**Trigger:** Step 7e in the decision tree. By this point, no `In Progress`, `New`, or `Draft` parent epics exist, and code review has been dispatched for any `Review` epics. The team has capacity for new work.
 
 1. List backlog items: `devchain_list_epics(statusName=Backlog)`.
 2. If backlog is empty → nothing to do.
 3. If backlog has items, **triage** them:
-   - **Read each item** — understand severity, business value, and effort.
+   - **Skip items tagged `planning-requested`** — these have already been sent to Brainstormer and are awaiting planning.
+   - **Read each remaining item** — understand severity, business value, and effort.
    - **Group related items** that could form a coherent phase.
    - **Discard ONLY if the exact same work was already completed** — check if a Done epic covers the same scope. "Empty container" or "no sub-epics" does NOT mean obsolete — it means the item hasn't been planned yet. When in doubt, send to Brainstormer.
 4. **Default action: send to Brainstormer for planning.** Most backlog items exist because they represent future work. For actionable backlog items:
    - Send the grouped items to **Brainstormer** via `devchain_send_message`:
      > "The team has capacity. These backlog items are ready for planning: [list items with IDs and summaries]. Please validate with SubBSM (technical) and Business Analyst (requirements) before finalizing, then decompose into executable epics. Send me the final plan for approval — do not wait for user input."
+   - **Tag sent items as `planning-requested`** (`devchain_update_epic(id, {addTags: ["planning-requested"]})`). Keep status `Backlog`. This prevents re-sending on the next loop without polluting the Draft pipeline.
    - The Brainstormer will run the full planning flow (Draft Plan → parallel SubBSM + BA validation → refined plan → EM approval) and create new phase epics.
 5. **Do NOT self-assign backlog items directly.** They must go through the planning process to get proper decomposition, validation, and acceptance criteria.
+
+### 6.4) Code Review Completion (Message-Triggered)
+
+When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
+
+1. **Remove dispatch tag:** `devchain_update_epic(epic_id, {removeTags: ["code-review-pending"]})`.
+
+2. **If verdict is APPROVED:**
+   - If the epic has a `remediates:<parentId>` tag → this is a remediation epic. Mark it `Done`, then run **Section 6.5** for the referenced parent.
+   - Otherwise → move the parent epic to `Done`: `devchain_update_epic(epic_id, {statusName: "Done"})`.
+   - REPEAT from step 7 to find next work.
+
+3. **If verdict is ISSUES FOUND (remediation needed):**
+   - **Move parent epic to `Blocked`:** `devchain_update_epic(epic_id, {statusName: "Blocked"})`. Add comment: `STATUS: BLOCKED — awaiting remediation from code review findings.`
+   - **Do NOT forward findings to Brainstormer** — the Code Reviewer already sends the remediation plan to Brainstormer directly (per Code Reviewer SOP Phase 4). Avoid duplicate handoffs.
+   - REPEAT from step 7 — Brainstormer will create `Draft` remediation epics (tagged `remediates:<epic_id>`), picked up by step 7c.
+
+### 6.5) Remediation Completion (Lifecycle Rule)
+
+**Trigger:** Called from Section 6.4 step 2 when a remediation epic (tagged `remediates:<parentId>`) is approved, or when any epic with `remediates:*` tag reaches `Done`.
+
+1. **Extract the parent ID** from the `remediates:<parentId>` tag.
+2. **List all remediation epics for that parent:** search for epics tagged `remediates:<parentId>`.
+3. **If ALL remediation epics are `Done`:**
+   - Move the original parent epic from `Blocked` back to `Review`: `devchain_update_epic(parentId, {statusName: "Review"})`.
+   - Add comment: `STATUS: REMEDIATION COMPLETE — re-requesting code review.`
+   - Step 7d will detect the `Review` epic without `code-review-pending` tag (removed in 6.4 step 1) and re-dispatch code review.
+4. **If remediation epics remain in progress** → wait. This check runs again when the next remediation epic completes.
 
 ---
 
