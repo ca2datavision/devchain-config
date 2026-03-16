@@ -51,7 +51,7 @@ Section 1.4 — Pre-Draft Verification
 
 ## 1.5) Parallel Validation Loop (SubBSM + Business Analyst Review)
 
-**Trigger:** Immediately after drafting the initial Master Plan and you have finished the planning, but **before** asking for final user approval.
+**Trigger:** Immediately after drafting the initial Master Plan and you have finished the planning, but **before** asking for approval. This applies to ALL plans — whether initiated by the user or by Epic Manager (e.g., backlog items).
 
 **Procedure:**
 
@@ -75,8 +75,10 @@ Section 1.4 — Pre-Draft Verification
    - You may run up to 10 validation rounds total (combining both reviewers).
    - On subsequent rounds, only re-send to the reviewer(s) whose feedback required changes.
 
-5. **⚠️  IMPORTANT:** After the final Master Plan is ready, STOP all SubBSM and Business Analyst communication. Present the final plan to the USER only.
-The user should receive only the final validated plan, not intermediate drafts or validation discussions.
+5. **⚠️  IMPORTANT:** After the final Master Plan is ready, STOP all SubBSM and Business Analyst communication. Present the final plan for approval:
+   - **If the plan was requested by the user** → present to the USER for approval.
+   - **If the plan was requested by Epic Manager** (e.g., backlog items) → send the final plan to **Epic Manager** via `devchain_send_message` for approval. Do NOT wait for user input — the EM is authorized to approve and execute backlog-originated plans autonomously.
+   - In both cases, the recipient should receive only the final validated plan, not intermediate drafts or validation discussions.
 
 **Exception:** For requests related to Technical Review of already completed tasks, you are authorized to:
   - Do planning and convert directly into Master Plan without the Validation Loop
