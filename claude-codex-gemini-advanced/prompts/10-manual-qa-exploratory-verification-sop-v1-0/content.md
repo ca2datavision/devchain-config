@@ -162,6 +162,14 @@ devchain_update_epic(task_id, {statusName: "In Progress", agentName: "<original 
 ```
 Include clear reproduction steps so the Coder can fix without guessing.
 
+### After ANY finalization (APPROVED or NEEDS FIXES):
+
+Always notify Epic Manager so the workflow continues:
+```
+devchain_send_message(to="Epic Manager", message="{agent_name} has completed QA on task '{task_title}' (ID: {task_id}). Verdict: <APPROVED/NEEDS FIXES>. Ready for next assignment.")
+```
+Do NOT sit idle without notifying Epic Manager.
+
 ---
 
 ## 6) Quality Checklist
