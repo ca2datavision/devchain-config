@@ -224,10 +224,11 @@ Upon receiving a notification of a **newly assigned task**:
 When a QA agent (Automated QA or Manual QA) sends a message that QA is complete on a task:
 
 1. **Check parent epic completion:** Fetch the parent epic of the completed task and list ALL its sub-epics.
-   - If ALL sub-epics are `Done` or `Archive` → mark the parent epic `Done`.
+   - If ALL sub-epics are `Done` or `Archive` AND parent is `In Progress` → move parent to `Review` (same as step 6d). This ensures the parent goes through code review before being marked Done.
+   - If ALL sub-epics are `Done` or `Archive` AND parent is already `Done` or `Review` → leave it alone.
    - If sub-epics remain in `New`/`Draft` → assign them to available Coders immediately.
    - If sub-epics remain in `In Progress`/`Review`/`QA` → wait for those.
-2. **After marking a parent epic Done** → run step 7 from the High-Level Flow (Section 2) to find the next work. Do NOT stop.
+2. **After moving a parent epic to Review** → run step 7 from the High-Level Flow (Section 2) to find the next work. Do NOT stop.
 3. **If the QA agent reports availability** → note it. Assign QA work when the next task reaches QA status.
 
 ### 6.2) Coder Availability (Message-Triggered)
@@ -251,8 +252,8 @@ When a Coder sends a message saying they are available for new assignments:
 3. If backlog has items, **triage** them:
    - **Read each item** — understand severity, business value, and effort.
    - **Group related items** that could form a coherent phase.
-   - **Discard obsolete items** — if a backlog item was already addressed by later work, move it to `Archive` with a comment explaining why.
-4. For actionable backlog items:
+   - **Discard ONLY if the exact same work was already completed** — check if a Done epic covers the same scope. "Empty container" or "no sub-epics" does NOT mean obsolete — it means the item hasn't been planned yet. When in doubt, send to Brainstormer.
+4. **Default action: send to Brainstormer for planning.** Most backlog items exist because they represent future work. For actionable backlog items:
    - Send the grouped items to **Brainstormer** via `devchain_send_message`:
      > "The team has capacity. These backlog items are ready for planning: [list items with IDs and summaries]. Please validate with SubBSM (technical) and Business Analyst (requirements) before finalizing, then decompose into executable epics. Send me the final plan for approval — do not wait for user input."
    - The Brainstormer will run the full planning flow (Draft Plan → parallel SubBSM + BA validation → refined plan → EM approval) and create new phase epics.
