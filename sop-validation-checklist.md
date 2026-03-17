@@ -197,7 +197,7 @@
 | Step | Actor | Action | Expected State Change | Checkpoint |
 |------|-------|--------|----------------------|------------|
 | 1 | C1 | Completes last assigned task → Review | — | [ ] Moves to Review |
-| 2 | C1 | Sends availability message to EM | Message sent | [ ] Uses correct API: `recipient="agents", recipientAgentNames=["Epic Manager"]` |
+| 2 | C1 | Sends availability message to EM | Message sent | [ ] Uses correct API: `recipientAgentNames=["Epic Manager"]` |
 | 3 | EM | Section 6.2: receives availability | — | [ ] Recognizes the message |
 | 4 | EM | Finds next unassigned NW sub-epic | — | [ ] Assigns to C1 |
 | 5 | — | — | — | [ ] C1 does NOT go idle |
@@ -763,22 +763,45 @@ EM's step 7 must check in this exact order:
 
 ## SUMMARY
 
-| Section | Scenarios | Critical | High | Medium | Low |
-|---------|-----------|----------|------|--------|-----|
-| 1. Happy Path | 3 | 1 | 2 | 0 | 0 |
-| 2. Code Review | 4 | 3 | 1 | 0 | 0 |
-| 3. Task Assignment | 4 | 1 | 2 | 1 | 0 |
-| 4. QA Flow | 3 | 0 | 2 | 1 | 0 |
-| 5. Backlog & Planning | 4 | 0 | 1 | 3 | 0 |
-| 6. State Transitions | 3 | 2 | 1 | 0 | 0 |
-| 7. Message Contracts | 4 | 2 | 2 | 0 | 0 |
-| 8. Tag Lifecycle | 3 | 1 | 2 | 0 | 0 |
-| 9. Context Recovery | 5 | 1 | 3 | 1 | 0 |
-| 10. Edge Cases | 7 | 1 | 1 | 4 | 1 |
-| 11. Cross-SOP | 4 | 0 | 1 | 2 | 1 |
-| 12. Performance | 3 | 1 | 2 | 0 | 0 |
-| **Total** | **47** | **13** | **20** | **12** | **2** |
+> **Last validated:** 2026-03-17 — after 3 review iterations with Code Reviewer (commit `065e07a`).
 
----
+| Section | Scenarios | Critical | High | Medium | Low | Status |
+|---------|-----------|----------|------|--------|-----|--------|
+| 1. Happy Path | 3 | 1 | 2 | 0 | 0 | **PASS** |
+| 2. Code Review | 4 | 3 | 1 | 0 | 0 | **PASS** |
+| 3. Task Assignment | 4 | 1 | 2 | 1 | 0 | **PASS** |
+| 4. QA Flow | 3 | 0 | 2 | 1 | 0 | **PASS** |
+| 5. Backlog & Planning | 4 | 0 | 1 | 3 | 0 | **3 PASS, 1 DEFERRED** |
+| 6. State Transitions | 3 | 2 | 1 | 0 | 0 | **PASS** |
+| 7. Message Contracts | 4 | 2 | 2 | 0 | 0 | **PASS** |
+| 8. Tag Lifecycle | 3 | 1 | 2 | 0 | 0 | **PASS** |
+| 9. Context Recovery | 5 | 1 | 3 | 1 | 0 | **PASS** |
+| 10. Edge Cases | 7 | 1 | 1 | 4 | 1 | **4 PASS, 3 DEFERRED** |
+| 11. Cross-SOP | 4 | 0 | 1 | 2 | 1 | **PASS** |
+| 12. Performance | 3 | 1 | 2 | 0 | 0 | **PASS** |
+| **Total** | **47** | **13** | **20** | **12** | **2** | **43 PASS, 4 DEFERRED** |
 
-> **Next step:** After fixing audit findings, run through each scenario and mark checkpoints. Any unchecked box = remaining gap.
+### Verification evidence (Code Reviewer final pass, 2026-03-17)
+
+| Scenario | Verdict | Evidence |
+|----------|---------|----------|
+| S2.1 Remediation cycle | PASS | CR→EM structured JSON (`04-cr:79-83`), EM Blocked+tag removal (`02-em:297,305-307`), Section 6.6 unblock (`02-em:311-318`) |
+| S2.2 Dispatch idempotency | PASS | Tag guard in EM step 7d (`02-em:95-103`) |
+| S2.3 CR-00 prevention | PASS | Mandatory JSON + anti-free-text warning (`04-cr:56-65`) |
+| S3.1 Parallel deadlock | PASS | Explicit-dependency-only blocking (`01-worker:44`) |
+| S6.1 Done terminal | PASS | No Done→non-Done path found in any SOP |
+| S6.2 Transition matrix | PASS | All transitions follow allowed matrix |
+| S6.3 Parent depends on subs | PASS | Blocked included in gate (`02-em:83-87,237-241`) |
+| S7.1 API shape | PASS | Canonical shape `sessionId + recipientAgentNames` in all SOPs |
+| S7.2 CR verdict format | PASS | Exact JSON examples + mandatory rule (`04-cr:56-65,79-83`) |
+| S7.3 BSM plan messages | PASS | Exact JSON call examples for Type A + B (`03-bsm:80-90,100-104`) |
+| S7.4 QA notifications | PASS | Single canonical notification, no duplicates (`11-aqa:193,204-209`) |
+
+### Deferred scenarios (known gaps — design decisions needed)
+
+| Scenario | Issue | Audit ref |
+|----------|-------|-----------|
+| S5.4 Validation timeout | BSM HARD STOP on SubBSM/BA with no timeout/escalation | ME-06 |
+| S10.1 Stale task detection | No mechanism to detect agent crash mid-task | ME-04 |
+| S10.2 Unknown message type | EM has no fallback for unrecognized messages | — |
+| S10.6 Merge conflicts | No git branching strategy for parallel coders | ME-05 |
