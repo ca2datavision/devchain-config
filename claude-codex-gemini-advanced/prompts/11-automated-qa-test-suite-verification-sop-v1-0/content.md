@@ -182,14 +182,15 @@ Post results using this format:
 ```
 devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with APPROVED verdict>\nRouting to Manual QA for acceptance/exploratory testing.")
 devchain_update_epic(task_id, {agentName: "Manual QA"})
+# Note: status intentionally stays "QA" — Manual QA picks up QA-status tasks assigned to them
 ```
 
 **Non-user-facing task (pure backend, refactoring, infra) → mark Done:**
 ```
 devchain_add_epic_comment(task_id, "<AUTOMATED QA REPORT with APPROVED verdict>")
 devchain_update_epic(task_id, {statusName: "Done"})
-devchain_send_message(to="Epic Manager", message="QA COMPLETE: Task '{task_title}' (ID: {task_id}) — APPROVED and marked Done. Parent epic may be ready for completion check.")
 ```
+(The universal notification below handles EM notification — do not send a separate one here.)
 
 ### If NEEDS FIXES:
 
@@ -204,7 +205,7 @@ Include full error output and analysis so the Coder can fix without guessing.
 
 Always notify Epic Manager so the workflow continues:
 ```
-devchain_send_message(to="Epic Manager", message="{agent_name} has completed QA on task '{task_title}' (ID: {task_id}). Verdict: <APPROVED/NEEDS FIXES>. Ready for next assignment.")
+devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"], message="{agent_name} has completed QA on task '{task_title}' (ID: {task_id}). Verdict: <APPROVED/NEEDS FIXES>. Ready for next assignment.")
 ```
 Do NOT sit idle without notifying Epic Manager.
 
@@ -240,7 +241,7 @@ When your context has been compacted or you receive a session recovery message:
 
 1. **Re-read this SOP** to refresh your operating instructions.
 2. **Reload your current work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
-3. **For each task in Review:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments — find the Coder's evidence and any prior QA attempts.
+3. **For each task in QA:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments — find the Coder's evidence and any prior QA attempts.
 4. **Resume testing** from where you left off. If you already posted a partial report, update it rather than duplicating.
 5. **Re-read project docs** if they exist (docs/development-standards.md) for test conventions.
 

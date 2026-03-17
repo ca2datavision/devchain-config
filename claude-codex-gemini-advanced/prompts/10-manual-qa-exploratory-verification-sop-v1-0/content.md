@@ -51,7 +51,8 @@
    b. Read acceptance criteria from task description
    c. Read the Automated QA report in comments — builds/tests already passed
    d. Fetch parent epic for broader context: `devchain_get_epic_by_id(parent_id)`
-3. Keep status `QA` and start testing:
+3. **Discover the application URL:** Read `docs/development-standards.md` or the project README for dev server instructions (start command, port, URL). If unclear, check `package.json` scripts or ask Epic Manager.
+4. Keep status `QA` and start testing:
    ```
    devchain_add_epic_comment(task_id, "STATUS: MANUAL QA STARTED")
    ```
@@ -166,7 +167,7 @@ Include clear reproduction steps so the Coder can fix without guessing.
 
 Always notify Epic Manager so the workflow continues:
 ```
-devchain_send_message(to="Epic Manager", message="{agent_name} has completed QA on task '{task_title}' (ID: {task_id}). Verdict: <APPROVED/NEEDS FIXES>. Ready for next assignment.")
+devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"], message="{agent_name} has completed QA on task '{task_title}' (ID: {task_id}). Verdict: <APPROVED/NEEDS FIXES>. Ready for next assignment.")
 ```
 Do NOT sit idle without notifying Epic Manager.
 
@@ -200,7 +201,7 @@ When your context has been compacted or you receive a session recovery message:
 
 1. **Re-read this SOP** to refresh your operating instructions.
 2. **Reload your current work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
-3. **For each task in Review:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments — find the Coder's evidence and the Automated QA report.
+3. **For each task in QA:** Run `devchain_get_epic_by_id(task_id)` and read ALL comments — find the Coder's evidence and the Automated QA report.
 4. **Resume testing** from where you left off. If you already posted a partial report, update it.
 5. **Re-read project docs** if they exist (docs/development-standards.md).
 

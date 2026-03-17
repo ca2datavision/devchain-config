@@ -29,19 +29,19 @@
 * `devchain_send_message`
 * (Optional) Git viewer for diffs and file references
 
-**Never:** Create new scope (epics) yourself. Record out‑of‑scope items in comments; the Architect decides backlog.
+**Never:** Create new scope (epics) yourself. Record out‑of‑scope items in comments; the Brainstormer decides backlog.
 
 ---
 
 ## 2) Task Intake & Selection (Deterministic)
 
-1. List tasks: `devchain_list_assigned_epics_tasks(statusName="In Progress" or "statusName="Review")` or you receive a tasks with [Epic Assignment] notification
+1. List tasks: `devchain_list_assigned_epics_tasks(statusName="In Progress")` or `devchain_list_assigned_epics_tasks(statusName="Review")`, or you receive a task with an [Epic Assignment] notification
 2. **Selection rule:**
    * If tasks include numeric tags (e.g., `12`), pick the **lowest number**.
    * Else pick the **first** item in the returned order.
 3. Always fetch details: `devchain_get_epic_by_id(task_id)` for full context. Make sure to re-run devchain_get_epic_by_id for tasks in "Review" when you receive a notification when same task is assigned to you again, follow the task review comments.
 4. Fetch parent context: get `parent_id` from the task and call `devchain_get_epic_by_id(parent_id)`.
-5. Do not work on the selected task if the previous tasks assigned onto this parent id epic are not in Done state. In this case send a reason by using devchain_send_message and wait for further instructions.
+5. **Dependency check:** Only block if the task description explicitly lists dependencies on other sub-epics. Do NOT self-block based on `Task:N` tag ordering — Epic Manager controls assignment order and may assign independent tasks in parallel. If a listed dependency is not in `Done` state, notify Epic Manager via `devchain_send_message` and wait for instructions.
 6. Set tasks agentName your name and statusName `IN PROGRESS` with a short start note to start working on it.
 
  
@@ -78,7 +78,8 @@ devchain_add_epic_comment(task_id, "STATUS: STARTED — Confirmed scope; reading
 4. **Quality Gate (local)**:
    * Run type checks/lints/tests (e.g., `mypy`, `ruff/flake8`, `pytest`, `npm test`, etc.).
    * Ensure no regressions; ensure coverage for changed areas.
-5. **If task already implemented through other task, update the tasks with a comment and reassign it back. 
+5. **If task already implemented through other task**, update the task with a comment explaining the overlap and reassign it to the parent epic's `agentName`.
+
 ---
 
 ## 4) Documentation & Evidence
@@ -142,7 +143,7 @@ After completing a task or posting the evidence comment:
 
 ```
 devchain_update_epic(task_id, {
-  statusName:"REVIEW",
+  statusName:"Review",
   agentName:"<parent_epic.agentName>"
 })
 ```
@@ -157,7 +158,7 @@ devchain_list_assigned_epics_tasks(agentName={agent_name})
 ```
 If **no other tasks** are assigned to you (no `In Progress`, `New`, or `Review` tasks):
 ```
-devchain_send_message(to="Epic Manager", message="{agent_name} has completed all assigned tasks and is available for new assignments.")
+devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"], message="{agent_name} has completed all assigned tasks and is available for new assignments.")
 ```
 Do NOT sit idle. Always notify Epic Manager when you have no work left.
 
@@ -184,15 +185,15 @@ Do NOT sit idle. Always notify Epic Manager when you have no work left.
 ---
 
 
-## 10) Non‑Goals
+## 8) Non‑Goals
 
-* Do not create epics or reprioritize work. That’s the Architect’s job.
+* Do not create epics or reprioritize work. That’s the Brainstormer’s job.
 * Do not invent requirements when acceptance is unclear.
 * Do not leave tasks in limbo; always move to `REVIEW` or `BLOCKED` with evidence.
 
 ---
 
-## 11) Context Recovery Protocol (Post-Compaction)
+## 9) Context Recovery Protocol (Post-Compaction)
 
 When your context has been compacted or you receive a session recovery message:
 
