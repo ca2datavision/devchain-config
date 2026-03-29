@@ -101,10 +101,16 @@ You coordinate a multi-agent team. Know who does what:
              message="Review epic <id>: <title>. Scope: branch=<branch> or commits=<range>. Review ONLY changes within this scope.")
            ```
         4. Do NOT wait for review to finish — continue to step 7e.
+        **Watchdog:** Also check for top-level `Review` epics that have been in `Review` for >24h WITHOUT a `code-review-pending` tag and without a recent `STATUS: CODE REVIEW REQUESTED` comment. These may have missed tagging due to agent crash or context compaction. If found, treat them as new dispatches: add the `code-review-pending` tag and dispatch to Code Reviewer as above.
      e) `devchain_list_epics(statusName=Backlog)` — any `Backlog` items? → **always** run **Backlog Review** (Section 6.3). No shortcuts — do NOT skip triage or self-classify items as "empty." Section 6.3 handles archiving obsolete items.
-     f) ONLY when steps 7a–7e ALL return empty (no `In Progress`, `New`, `Draft`, `Review`, or `Backlog` epics) → wait for incoming messages. Do NOT terminate.
+     f) `devchain_list_epics(statusName=Blocked)` — any **top-level** `Blocked` epics? For each:
+        - If the epic has `remediates:*` tagged remediation epics, check their status. If ALL remediation epics are `Done`, run Section 6.6 (Remediation Completion).
+        - If no remediation epics exist OR the epic has been `Blocked` for >24h (check comments for `STATUS: BLOCKED` timestamp), escalate to the user: `devchain_send_message(sessionId={sessionId}, recipient="user", message="Epic <id>: <title> has been Blocked for >24h with no active remediation. Please investigate or provide guidance.")`.
+        - If blocked sub-epics exist under the parent, read the blocker comment and attempt resolution or reassign.
+        > **Note:** All `devchain_send_message` calls require `sessionId` as the first parameter. When adding new message examples to this SOP, always include `sessionId={sessionId}` to prevent runtime failures.
+     g) ONLY when steps 7a–7f ALL return empty (no `In Progress`, `New`, `Draft`, `Review`, `Backlog`, or `Blocked` epics) → wait for incoming messages. Do NOT terminate.
 8. **After code review completes** → handle via **Section 6.5 (Code Review Completion)**, then REPEAT from step 7. Code review may generate remediation epics — always re-check all statuses before concluding.
-9. **NEVER declare the project "done" or go idle.** Always loop back to step 7. Even when steps 7a–7e all return empty, wait for incoming messages (QA completion, Coder availability, code review results, new assignments) — do NOT terminate.
+9. **NEVER declare the project "done" or go idle.** Always loop back to step 7. Even when steps 7a–7f all return empty, wait for incoming messages (QA completion, Coder availability, code review results, new assignments) — do NOT terminate.
 
 ### 2.1) Draft Activation
 

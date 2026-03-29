@@ -16,7 +16,7 @@
 
 ## 1) Canonical States, Inputs & Tools
 
-**States:** `NEW` → `IN PROGRESS` → `REVIEW` → `QA` → `DONE` (or `BLOCKED`).
+**States:** `New` → `In Progress` → `Review` → `QA` → `Done` (or `Blocked`).
 
 **Inputs:** Items assigned to you in DevChain; parent Epic context; project docs referenced by the task.
 
@@ -42,7 +42,7 @@
 3. Always fetch details: `devchain_get_epic_by_id(task_id)` for full context. Make sure to re-run devchain_get_epic_by_id for tasks in "Review" when you receive a notification when same task is assigned to you again, follow the task review comments.
 4. Fetch parent context: get `parent_id` from the task and call `devchain_get_epic_by_id(parent_id)`.
 5. **Dependency check:** Only block if the task description explicitly lists dependencies on other sub-epics. Do NOT self-block based on `Task:N` tag ordering — Epic Manager controls assignment order and may assign independent tasks in parallel. If a listed dependency is not in `Done` state, notify Epic Manager via `devchain_send_message` and wait for instructions.
-6. Set tasks agentName your name and statusName `IN PROGRESS` with a short start note to start working on it.
+6. Set tasks agentName your name and statusName `In Progress` with a short start note to start working on it.
 
  
 ```
@@ -54,7 +54,7 @@ devchain_add_epic_comment(task_id, "STATUS: STARTED — Confirmed scope; reading
 
 * Verify `🚀 TODO WORK DETAILS` exists and is unambiguous.
 * Read **Prereads/Docs** listed by the task. If missing/unclear, ask in a comment reassign task owner (agentName) to the same Agent name who is the owner of the parent epic (do not invent scope).
-* Check dependencies; Must recheck the epic statuses if they are in dependencies; if unmet, comment and set statusName `BLOCKED`.
+* Check dependencies; Must recheck the epic statuses if they are in dependencies; if unmet, comment and set statusName `Blocked`.
 
 ---
 
@@ -66,6 +66,7 @@ devchain_add_epic_comment(task_id, "STATUS: STARTED — Confirmed scope; reading
    * Read any linked files + specified line numbers.
    * Re‑read parent Epic description/acceptance for alignment.
    * Read for new review comments in the test if the task is in Review status
+   * If the task was returned from QA (Automated QA or Manual QA), read the latest QA report comment (🧪 AUTOMATED QA REPORT or 🔍 MANUAL QA REPORT) to understand which checks failed. Address each failing point before resubmitting.
 
 2. **Plan** a minimal path to green:
 
@@ -138,7 +139,7 @@ After completing a task or posting the evidence comment:
 
     Set the **review assignee** to the parent Epic's `agentName` (the agent who owns the parent epic).
        - Update(reassign) task to the parent epic's agent (Do NOT infer the reviewer from epic titles or context clues always use parent epic's agent)
-       - In the update call you must also set status to `REVIEW`.
+       - In the update call you must also set status to `Review`.
 
 
 ```
@@ -148,7 +149,7 @@ devchain_update_epic(task_id, {
 })
 ```
 
-3. If you set `BLOCKED`, include a crisp blocker summary and update the task owner to parent_epic.agentName
+3. If you set `Blocked`, include a crisp blocker summary and update the task owner to parent_epic.agentName
 
 ### 5.1) Request New Assignment When Idle
 
@@ -169,7 +170,7 @@ Do NOT sit idle. Always notify Epic Manager when you have no work left.
 * Re‑running the SOP on the same task must not duplicate comments or state transitions. If a duplicate post is detected, append `(update #N)`.
 * Do **not** enlarge scope. If something is *nice‑to‑have*, put it under **ADDITIONAL TODOs**.
 * If acceptance criteria are missing, request them; do not proceed with assumptions.
-* If dependencies are unmet, pause and mark `BLOCKED`.
+* If dependencies are unmet, pause and mark `Blocked`.
 
 ---
 
@@ -180,7 +181,7 @@ Do NOT sit idle. Always notify Epic Manager when you have no work left.
 * [ ] Acceptance criteria demonstrably met (evidence provided).
 * [ ] Files and precise line ranges are listed.
 * [ ] Out‑of‑scope items captured; no over‑engineering.
-* [ ] Status changed to `REVIEW`; reviewer assigned properly.
+* [ ] Status changed to `Review`; reviewer assigned properly.
 
 ---
 
@@ -189,7 +190,7 @@ Do NOT sit idle. Always notify Epic Manager when you have no work left.
 
 * Do not create epics or reprioritize work. That’s the Brainstormer’s job.
 * Do not invent requirements when acceptance is unclear.
-* Do not leave tasks in limbo; always move to `REVIEW` or `BLOCKED` with evidence.
+* Do not leave tasks in limbo; always move to `Review` or `Blocked` with evidence.
 
 ---
 

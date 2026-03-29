@@ -2,14 +2,14 @@
   {
     "id": "7cf13850-75e8-4832-bb9a-29e728f1b75d",
     "label": "Backlog",
-    "color": "#6c757d",
+    "color": "#9b59b6",
     "position": 0,
     "mcpHidden": false
   },
   {
     "id": "3e1bf6b2-8eab-4b83-97aa-24ef5190858f",
     "label": "Draft",
-    "color": "#f5f5f5",
+    "color": "#b0bec5",
     "position": 1,
     "mcpHidden": false
   },

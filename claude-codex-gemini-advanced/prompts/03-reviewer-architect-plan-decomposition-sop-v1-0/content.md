@@ -107,7 +107,7 @@ Section 1.4 — Pre-Draft Verification
 
 ## 2) High‑Level Flow to run for each identified Phase (Phase → Epics → Sub‑Epics)
 
-1. **Discuss to create Draft Plan → Execute Parallel Validation with SubBSM + Business Analyst (Section 1.5) → Present the final plan to the USER approval**
+1. **Discuss to create Draft Plan → Execute Parallel Validation with SubBSM + Business Analyst (Section 1.5) → Present the final plan for approval: to the USER if user-initiated, or to Epic Manager if EM-initiated (see Section 1.5 step 5 for routing rules)**
 2. **If it’s a new project, wait for Master Plan approval then repeat Documentation validation** (Section 10)
 3. **Set a short name for master plan; and remember it** use this name to as a tag in all Epics created
 4. **Create the Phase Epic** (Section 3).
@@ -146,10 +146,10 @@ Record the returned epic id phase for later use.
 **Action:**
 * **agentName:** <keep this field empty>
 * **Title:** `BACKLOG: <Phase N>: <same short name>`
-* **State:** `BACKLOG`
+* **State:** `Backlog`
 * **Description:** Purpose + triage rules (severity/priority SLA), includes “Linked Phase Epic: <phaseEpicId>”.
 
-Create as **top‑level** (do NOT set parentId). Status: BACKLOG. Tags: Backlog, Phase:1, phaseId:<phaseEpicId>
+Create as **top‑level** (do NOT set parentId). Status: Backlog. Tags: Backlog, Phase:1, phaseId:<phaseEpicId>
 The `phaseId:<phaseEpicId>` tag links this backlog to its phase without structural nesting.
 Record this id backlog
 
@@ -206,7 +206,7 @@ To read by slug use devchain_get_prompt
 
 When a need is **not required** to complete the current Phase or a Sub‑Epic:
 
-* Parent: Backlog epic `epic_id backlog`, Status: BACKLOG, Tags: Backlog, Phase:1, phaseId:<phaseEpicId>, use the same **Sub‑Epic Template**, but set **Type** meta to `TODO` or `CONCERN`
+* Parent: Backlog epic `epic_id backlog`, Status: Backlog, Tags: Backlog, Phase:1, phaseId:<phaseEpicId>, use the same **Sub‑Epic Template**, but set **Type** meta to `TODO` or `CONCERN`
 
 ---
 
@@ -218,7 +218,7 @@ When a need is **not required** to complete the current Phase or a Sub‑Epic:
 * [ ] Tests & Docs sub‑epics created where applicable.
 * [ ] Backlog items captured (no scope creep in sub‑epics).
 * [ ] No over‑engineering: defer nice‑to‑haves to backlog.
-* [ ] States correct: Phase `Draft`, Backlog `BACKLOG`, Sub‑Epics `New`.
+* [ ] States correct: Phase `Draft`, Backlog `Backlog`, Sub‑Epics `New`.
 
 ---
 
