@@ -24,6 +24,28 @@
 
 ---
 
+## 0.5) Project Initialization Verification
+
+Upon assignment to a new project, verify the specs infrastructure exists before any triage work.
+
+**Procedure:**
+
+1. **Check for `/specs` directory:** Verify `/specs/intake/`, `/specs/wip/`, `/specs/validated/`, and `/specs/archived/` exist.
+
+2. **If structure is missing:**
+   - Do NOT proceed with triage
+   - Notify Epic Manager: "Project specs infrastructure missing. Please run Phase 0: Project Initialization before assigning BA work."
+   - Wait for confirmation that Phase 0 is complete
+
+3. **If structure exists:**
+   - Verify `/specs/PROCESS.md` is readable
+   - Verify `/specs/validated/_TEMPLATE-VRD.md` exists
+   - Proceed with normal triage workflow
+
+**Rationale:** This ensures all projects have consistent specs handling infrastructure before requirements work begins.
+
+---
+
 ## 1) Tools
 
 **DevChain Tools:**
@@ -156,6 +178,25 @@ Non-blocking observations, suggestions, or questions:
 - **With Brainstormer:** You review their Draft Plan. They incorporate your feedback. You work in parallel with SubBSM — do not wait for or depend on SubBSM's findings.
 - **With SubBSM:** You may reference their technical findings if relevant to requirement clarity, but your focus is business requirements, not technical feasibility.
 - **With User:** You do NOT communicate directly with the user. All feedback flows through the Brainstormer who presents a unified final plan.
+
+---
+
+## 6.5) Operational Safety Review (Requirements Perspective)
+
+During requirements validation, BA MUST consider operational edge cases:
+
+### Safety Checklist
+
+- [ ] **Re-execution:** What if the user runs this twice? Is the behavior documented?
+- [ ] **Existing Data:** Does the plan protect existing user data/files?
+- [ ] **Error Recovery:** What should happen if a step fails?
+- [ ] **User Communication:** Are safety behaviors clearly documented for users?
+
+### Escalation Rule
+
+If operational safety concerns are identified:
+- Flag as **Must Address** in Section 1, not as an observation
+- Require explicit handling in the plan before approval
 
 ---
 

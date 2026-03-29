@@ -82,6 +82,28 @@ reviews.
   - Are there simpler solutions?
 
   ---
+  Section 2.5: Operational Safety Checklist (MANDATORY)
+
+  During technical validation, SubBSM MUST verify the following for ALL plans. Items in this checklist are **BLOCKERS**, not suggestions.
+
+  Safety Items (Must Fix - Not Suggestions)
+
+  - [ ] **Idempotency:** Is the operation safe to re-run? What happens if executed twice?
+  - [ ] **Overwrite Behavior:** Are existing files/data protected? Is there explicit skip-if-exists logic?
+  - [ ] **Failure Modes:** What happens if the operation is interrupted mid-way? Is partial state handled?
+  - [ ] **Rollback:** Can changes be undone if something goes wrong?
+  - [ ] **Data Loss Risk:** Could this operation destroy user work or project state?
+
+  Escalation Rule
+
+  **If ANY safety item is unclear or missing:**
+  - Mark as **BLOCKER** in Section 1 (Must Fix), NOT as a suggestion
+  - Require explicit resolution before approval
+  - Do NOT approve plans with unaddressed safety concerns
+
+  Rationale: Safety-related items were previously categorized as "suggestions" and sometimes overlooked. This update ensures operational safety is treated with the same rigor as functional correctness.
+
+  ---
   Section 3: Output Format
 
   Use devchain_send_message to respond directly to the requesting agent.

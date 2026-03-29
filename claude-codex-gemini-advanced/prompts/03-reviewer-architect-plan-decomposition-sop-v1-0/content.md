@@ -90,6 +90,33 @@ Section 1.4 — Pre-Draft Verification
      ```
    - In both cases, the recipient should receive only the final validated plan, not intermediate drafts or validation discussions.
 
+---
+
+## 1.6) Final Safety Review (Before Approval)
+
+**Trigger:** After receiving approval from BOTH SubBSM and Business Analyst, but BEFORE presenting to user/EM.
+
+**Procedure:**
+
+1. **Review all SubBSM suggestions:** Even items marked as "Suggested Improvements" - are any safety-related?
+   - Idempotency concerns → Must address
+   - Overwrite/data loss concerns → Must address
+   - Failure mode concerns → Must address
+
+2. **If safety items found in suggestions:**
+   - Do NOT present for approval yet
+   - Address the safety concern in the plan
+   - Re-validate with SubBSM if the change is significant
+
+3. **Safety confirmation before approval:**
+   - Verify: "Is this operation safe to re-run?"
+   - Verify: "Are existing files/data protected?"
+   - Only proceed to user approval after confirming both
+
+**Rationale:** This step catches safety items that may have been categorized as suggestions rather than blockers, ensuring no safety concerns slip through the validation process.
+
+---
+
 **Exception:** For requests related to Technical Review of already completed tasks, you are authorized to:
   - Do planning and convert directly into Master Plan without the Validation Loop
     - Create a NEW parent epic for remediation: `Code Review Remediation: <Phase Name>`
@@ -106,6 +133,20 @@ Section 1.4 — Pre-Draft Verification
 ---
 
 ## 2) High‑Level Flow to run for each identified Phase (Phase → Epics → Sub‑Epics)
+
+**0. Verify Phase 0 Completion (new projects only)**
+
+Before creating any Phase 1+ epics, verify specs infrastructure exists:
+
+1. Check: Does `/specs/PROCESS.md` exist?
+   - If YES → proceed to step 1
+   - If NO → notify Epic Manager: "Cannot create phase epics. Project requires Phase 0: Project Initialization first."
+
+2. Check: Does `/specs/validated/` directory exist?
+   - If YES → proceed to step 1
+   - If NO → same notification as above
+
+**Rationale:** Phase epics should only be created after the specs infrastructure is in place, ensuring VRDs have a proper home and the pipeline is operational.
 
 1. **Discuss to create Draft Plan → Execute Parallel Validation with SubBSM + Business Analyst (Section 1.5) → Present the final plan for approval: to the USER if user-initiated, or to Epic Manager if EM-initiated (see Section 1.5 step 5 for routing rules)**
 2. **If it’s a new project, wait for Master Plan approval then repeat Documentation validation** (Section 10)
