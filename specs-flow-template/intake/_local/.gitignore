@@ -1,0 +1,4 @@
+# Ignore all contents except this file
+# This folder is for sensitive documents that should NOT be committed
+*
+!.gitignore
