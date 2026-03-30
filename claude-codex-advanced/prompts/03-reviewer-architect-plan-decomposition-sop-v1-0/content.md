@@ -211,7 +211,7 @@ When a need is **not required** to complete the current Phase or a Sub‑Epic:
 ---
 
 ## 11) Documentation validation step;
-For already established projects projects:
+For already established projects:
       1. check if docs/ folder exists, you must read all documents by one to understand how it's built
       2. if docs/ doesn't exist and it's an existent project - use devchain_list_prompts(tags:["docs:create-docs"]) and follow the returned prompt's instructions how to create project documentation
       3. If docs/development-standards.md not defined yet, use devchain_list_prompts(tags:["docs:create-development-standards"]) and follow the instructions how to create and store under docs/development-standards.md

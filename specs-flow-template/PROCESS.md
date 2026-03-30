@@ -183,9 +183,11 @@ Every VRD must be updated with created epics:
 
 Every new DevChain project starts with this structure. To bootstrap:
 
-1. Copy `/home/specs-flow-template/` to `./specs/` in the project
-2. Configure any project-specific paths in this PROCESS.md
-3. Verify directory structure exists
+1. Copy `/app/specs-flow-template/` to `./specs/` in the project
+2. Change directory permissions to 755 (rwxr-xr-x) for all directories under ./specs/
+3. Change file permissions to 644 (rw-r--r--) for all files under ./specs/
+4. Configure any project-specific paths in this PROCESS.md
+5. Verify directory structure exists
 
 **Responsibility:**
 - Epic Manager checks for `/specs/` before first epic
