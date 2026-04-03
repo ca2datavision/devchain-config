@@ -1,0 +1,25 @@
+{
+  "id": "5510dbfa-9868-45ec-b056-d44fe411ff2b",
+  "name": "Continue on compact",
+  "description": null,
+  "enabled": true,
+  "eventName": "watcher.conversation.compacted",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "continue"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    }
+  },
+  "delayMs": 10000,
+  "cooldownMs": 300000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 0
+}

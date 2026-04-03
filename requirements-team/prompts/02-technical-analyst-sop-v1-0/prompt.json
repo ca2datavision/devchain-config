@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "35df139c-8d8b-4445-ba30-7b28caa98913",
+  "title": "Technical Analyst — SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:technical-analyst"
+  ]
+}

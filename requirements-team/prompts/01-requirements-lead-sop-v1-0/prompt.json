@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "07745f9e-cbcd-45e8-a357-57582e35bce8",
+  "title": "Requirements Lead — SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:requirements-lead"
+  ]
+}

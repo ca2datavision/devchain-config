@@ -73,7 +73,7 @@ Before processing any epics in a new project, verify specs infrastructure exists
 **Procedure:**
 
 1. **Check for `/specs` directory:**
-   - If `/specs/PROCESS.md` exists → infrastructure is ready, proceed to step 1 (DO NOT run Phase 0)
+   - If `/specs/PROCESS.md` exists → infrastructure is ready, proceed to step 1a
    - If missing → project needs Phase 0
 
 2. **If Phase 0 needed:**
@@ -86,8 +86,25 @@ Before processing any epics in a new project, verify specs infrastructure exists
 
 3. **After Phase 0 completes:**
    - Verify `/specs/PROCESS.md` exists
+   - Proceed to step 1a
+
+**1a. Detect Requirements Team (Adaptive Mode):**
+
+After Phase 0 verification, check if an external Requirements Team manages the specs pipeline:
+
+1. Check: Does `/specs/.team-owner.json` exist?
+   - If YES → read the file. If `"pipeline_mode": "external"`, an external Requirements Team is active.
+   - If NO → check `/specs/PROCESS.md` for `Pipeline Mode: external` header as fallback.
+
+2. **If external Requirements Team is detected:**
+   - Do NOT notify BA about intake triage readiness — the Requirements Team handles intake.
+   - VRDs will arrive in `/specs/validated/` from the external team.
+   - The Brainstormer will detect this and consume VRDs directly.
+   - Proceed with normal workflow — epics will be created from validated VRDs.
+
+3. **If NO external team detected (standalone mode):**
    - Notify BA: "Specs infrastructure ready. BA can begin triage."
-   - Proceed with normal workflow
+   - Proceed with normal workflow.
 
 **Idempotency:** This check runs on EVERY project assignment, but Phase 0 only executes if `/specs/PROCESS.md` is missing. If it exists, skip Phase 0 entirely - NEVER overwrite existing specs.
 

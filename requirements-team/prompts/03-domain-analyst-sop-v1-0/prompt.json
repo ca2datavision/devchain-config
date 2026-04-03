@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "41fde183-3089-4fa6-a9c9-0fdb946d35eb",
+  "title": "Domain Analyst — SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:domain-analyst"
+  ]
+}

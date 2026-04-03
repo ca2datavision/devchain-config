@@ -1,0 +1,12 @@
+{
+  "id": "4b08fb30-fc5b-49b2-a418-569d51d97ec8",
+  "name": "Requirements Lead (Claude)",
+  "provider": {
+    "id": "provider-claude",
+    "name": "claude"
+  },
+  "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan",
+  "instructions": "[[prompt:Requirements Lead — SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

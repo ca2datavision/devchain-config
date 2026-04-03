@@ -1,0 +1,51 @@
+[
+  {
+    "id": "8414b5ac-2363-4e06-9636-d7e8b3a2a88b",
+    "label": "Intake",
+    "color": "#3498db",
+    "position": 0,
+    "mcpHidden": false
+  },
+  {
+    "id": "48bdc6a5-6f61-4ebe-bfe3-e0dc222168fe",
+    "label": "Analysis",
+    "color": "#f39c12",
+    "position": 1,
+    "mcpHidden": false
+  },
+  {
+    "id": "41eaf528-0ff5-4aad-986d-90eeb216e1d5",
+    "label": "Draft",
+    "color": "#e67e22",
+    "position": 2,
+    "mcpHidden": false
+  },
+  {
+    "id": "5177ee2c-026a-4087-be7c-470cd7deb248",
+    "label": "Review",
+    "color": "#9b59b6",
+    "position": 3,
+    "mcpHidden": false
+  },
+  {
+    "id": "7ed2e5c6-dbb8-4bce-a5e1-4bf33adc8833",
+    "label": "Validated",
+    "color": "#2ecc71",
+    "position": 4,
+    "mcpHidden": false
+  },
+  {
+    "id": "c2c9f04b-9ba8-4a4c-9c21-96676d0ac0a8",
+    "label": "Blocked",
+    "color": "#e74c3c",
+    "position": 5,
+    "mcpHidden": false
+  },
+  {
+    "id": "50fa841d-cda3-420b-92c3-6a640b83b430",
+    "label": "Archive",
+    "color": "#95a5a6",
+    "position": 6,
+    "mcpHidden": false
+  }
+]

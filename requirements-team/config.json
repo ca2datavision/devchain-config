@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "exportedAt": "2026-04-03T00:00:00.000Z",
+  "initialPrompt": {
+    "promptId": "4bf0f20f-5a55-4567-8875-0c23dcd63657",
+    "title": "Initialize Agent"
+  },
+  "projectSettings": {
+    "initialPromptTitle": "Initialize Agent",
+    "autoCleanStatusLabels": [
+      "Archive"
+    ],
+    "epicAssignedTemplate": "[Epic Assignment]\n{epic_title} is now assigned to {agent_name} in {project_name}. (Epic ID: {epic_id})"
+  }
+}

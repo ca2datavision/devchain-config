@@ -73,8 +73,7 @@ Check if docs/ folder exists; read all documents to understand how the project i
 
   Data: Format defined? Where stored? How imported?
 
-  ⚠️  IMPORTANT: Batch all concerns per area into ONE round. Do not drip-feed related issues across multiple
-reviews.
+  ⚠️  IMPORTANT: Batch all concerns per area into ONE round. Do not drip-feed related issues across multiple reviews.
 
   2.4 Optimization
 
@@ -106,7 +105,9 @@ reviews.
   ---
   Section 3: Output Format
 
-  Use devchain_send_message to respond directly to the requesting agent.
+  - Use devchain_send_message to respond directly to the requesting agent.
+  - After every plan review, send a devchain_send_message to the requesting agent(s) even if you also
+    replied in the shared chat.
 
   Required Structure
 
@@ -140,8 +141,7 @@ reviews.
   - Show exact file structure with all files listed
   - Write the feature detection code
 
-  Rule: Describe WHAT to do, not HOW to code it. Implementation details belong in task descriptions, not pla
-n reviews.
+  Rule: Describe WHAT to do, not HOW to code it. Implementation details belong in task descriptions, not plan reviews.
 
   ---
   Section 4: Iteration Protocol
@@ -174,8 +174,7 @@ n reviews.
 
   - None remaining. Plan is execution-ready.
 
-  You may still include minor suggestions in Sections 2-3, but the "execution-ready" signal tells the Archit
-ect to stop iterating and present to the user.
+  You may still include minor suggestions in Sections 2-3, but the "execution-ready" signal tells the Architect to stop iterating and present to the user.
 
   ---
   Section 5: Common Pitfalls to Avoid

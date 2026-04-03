@@ -137,6 +137,11 @@ devchain_add_epic_comment(task_id, """
 
 After completing a task or posting the evidence comment:
 
+    **Commit the changes to git:**
+        - Stage only the files modified for this task
+        - Create a commit with message: `<task-title> (epic: <short-id>)`
+        - Include the commit hash in your completion comment
+        devchain_add_epic_comment(task_id, "Committed: <commit_hash>")
     Set the **review assignee** to the parent Epic's `agentName` (the agent who owns the parent epic).
        - Update(reassign) task to the parent epic's agent (Do NOT infer the reviewer from epic titles or context clues always use parent epic's agent)
        - In the update call you must also set status to `Review`.

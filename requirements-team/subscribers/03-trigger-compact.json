@@ -1,0 +1,25 @@
+{
+  "id": "ce84d620-327b-49b2-9865-101f956ff46b",
+  "name": "Trigger compact",
+  "description": null,
+  "enabled": true,
+  "eventName": "watcher.conversation.compact_request",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "/compact"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    }
+  },
+  "delayMs": 2000,
+  "cooldownMs": 300000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 0
+}

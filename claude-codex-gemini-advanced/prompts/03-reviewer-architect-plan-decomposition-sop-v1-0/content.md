@@ -139,14 +139,32 @@ Section 1.4 — Pre-Draft Verification
 Before creating any Phase 1+ epics, verify specs infrastructure exists:
 
 1. Check: Does `/specs/PROCESS.md` exist?
-   - If YES → proceed to step 1
+   - If YES → proceed to step 0b
    - If NO → notify Epic Manager: "Cannot create phase epics. Project requires Phase 0: Project Initialization first."
 
 2. Check: Does `/specs/validated/` directory exist?
-   - If YES → proceed to step 1
+   - If YES → proceed to step 0b
    - If NO → same notification as above
 
-**Rationale:** Phase epics should only be created after the specs infrastructure is in place, ensuring VRDs have a proper home and the pipeline is operational.
+**0b. Detect Requirements Team (Adaptive Mode)**
+
+Check if an external Requirements Team manages the specs pipeline:
+
+1. Check: Does `/specs/.team-owner.json` exist?
+   - If YES → read the file. If `"pipeline_mode": "external"`, an external Requirements Team is active.
+   - If NO → check `/specs/PROCESS.md` for `Pipeline Mode: external` header as fallback.
+
+2. **If external Requirements Team is detected (Pipeline Mode = external):**
+   - **Skip intake/triage entirely.** Do NOT process documents in `/specs/intake/`. The Requirements Team handles the full intake → VRD pipeline.
+   - **Consume VRDs directly** from `/specs/validated/`. These are your input for plan decomposition.
+   - When creating plans, reference the source VRD: `Source: /specs/validated/[FeatureName]-v[N]-VALIDATED.md`
+   - After creating epics from a VRD, update the VRD's "Created Epics" section with the epic IDs for traceability.
+   - If a VRD has open questions or insufficient detail, do NOT contact the Requirements Team directly. Instead, request clarification via `devchain_request_human_feedback` — the human will bridge between teams.
+
+3. **If NO external team detected (standalone mode):**
+   - Operate normally — run the full planning pipeline including intake and internal BA/SubBSM validation.
+
+**Rationale:** The Development Team can operate either standalone (handling everything) or alongside a Requirements Team (consuming VRDs). This detection ensures the right mode without manual configuration.
 
 1. **Discuss to create Draft Plan → Execute Parallel Validation with SubBSM + Business Analyst (Section 1.5) → Present the final plan for approval: to the USER if user-initiated, or to Epic Manager if EM-initiated (see Section 1.5 step 5 for routing rules)**
 2. **If it’s a new project, wait for Master Plan approval then repeat Documentation validation** (Section 10)

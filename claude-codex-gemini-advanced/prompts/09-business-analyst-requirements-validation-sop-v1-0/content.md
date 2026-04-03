@@ -40,9 +40,19 @@ Upon assignment to a new project, verify the specs infrastructure exists before 
 3. **If structure exists:**
    - Verify `/specs/PROCESS.md` is readable
    - Verify `/specs/validated/_TEMPLATE-VRD.md` exists
-   - Proceed with normal triage workflow
 
-**Rationale:** This ensures all projects have consistent specs handling infrastructure before requirements work begins.
+4. **Detect Requirements Team (Adaptive Mode):**
+   - Check: Does `/specs/.team-owner.json` exist?
+     - If YES → read the file. If `"pipeline_mode": "external"`, an external Requirements Team manages intake and VRD creation.
+     - If NO → check `/specs/PROCESS.md` for `Pipeline Mode: external` header as fallback.
+   - **If external Requirements Team is detected:**
+     - You operate in **plan-validation-only mode**. Do NOT triage intake documents — the Requirements Team handles the full intake → VRD pipeline.
+     - Your role is limited to validating Draft Plans from the Brainstormer (Section 3 analysis). This is your core function regardless of team configuration.
+     - VRDs in `/specs/validated/` are produced by the Requirements Team. You may reference them during plan validation for requirements context.
+   - **If NO external team detected:**
+     - Operate in full standalone mode — proceed with normal triage workflow including intake processing.
+
+**Rationale:** This ensures all projects have consistent specs handling infrastructure before requirements work begins, and the BA adapts its scope based on whether an external Requirements Team is active.
 
 ---
 

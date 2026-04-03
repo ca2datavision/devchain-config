@@ -1,0 +1,12 @@
+{
+  "id": "9aea3f2a-0c55-4905-a4ff-153feca2dd2d",
+  "name": "Domain Analyst (Gemini)",
+  "provider": {
+    "id": "provider-gemini",
+    "name": "gemini"
+  },
+  "options": "--model gemini-2.5-pro --approval-mode yolo",
+  "instructions": "[[prompt:Domain Analyst — SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null
+}

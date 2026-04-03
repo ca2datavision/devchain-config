@@ -1,0 +1,25 @@
+{
+  "id": "7718a01a-8539-46fc-b375-2c823fe79ce5",
+  "name": "Compacted",
+  "description": null,
+  "enabled": true,
+  "eventName": "watcher.conversation.compacted",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    }
+  },
+  "delayMs": 5000,
+  "cooldownMs": 300000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 0
+}

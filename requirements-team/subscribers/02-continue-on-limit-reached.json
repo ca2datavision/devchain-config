@@ -1,0 +1,25 @@
+{
+  "id": "d0b27cb9-cad1-4855-9ffb-bc0233d00fd2",
+  "name": "Continue on Limit reached",
+  "description": null,
+  "enabled": true,
+  "eventName": "watcher.claude.limit_reached",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "continue"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    }
+  },
+  "delayMs": 0,
+  "cooldownMs": 5000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 0
+}
