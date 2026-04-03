@@ -150,21 +150,33 @@ Before creating any Phase 1+ epics, verify specs infrastructure exists:
 
 Check if an external Requirements Team manages the specs pipeline:
 
-1. Check: Does `/specs/.team-owner.json` exist?
+1. **Check `.team-owner.json` (canonical source of truth):** Does `/specs/.team-owner.json` exist?
    - If YES → read the file. If `"pipeline_mode": "external"`, an external Requirements Team is active.
    - If NO → check `/specs/PROCESS.md` for `Pipeline Mode: external` header as fallback.
 
-2. **If external Requirements Team is detected (Pipeline Mode = external):**
+2. **Drift detection:** If `.team-owner.json` and `PROCESS.md` disagree (one says external, the other doesn't, or one is missing):
+   - **Fail safe:** Do NOT assume either mode.
+   - Request human clarification via `devchain_request_human_feedback`:
+     ```
+     devchain_request_human_feedback(sessionId={sessionId},
+       message="Specs pipeline ownership conflict detected. .team-owner.json and PROCESS.md disagree on pipeline_mode. Please confirm: is a Requirements Team managing the specs pipeline for this project?",
+       context="/specs/.team-owner.json vs /specs/PROCESS.md",
+       urgency="high")
+     ```
+   - Wait for human response before proceeding.
+
+3. **If external Requirements Team is detected (Pipeline Mode = external):**
    - **Skip intake/triage entirely.** Do NOT process documents in `/specs/intake/`. The Requirements Team handles the full intake → VRD pipeline.
    - **Consume VRDs directly** from `/specs/validated/`. These are your input for plan decomposition.
+   - **Check VRD metadata** before consuming: read the HTML comment metadata block at the top. Only consume VRDs where `ready_for_dev_team: true` and `blocking_open_questions: false`.
    - When creating plans, reference the source VRD: `Source: /specs/validated/[FeatureName]-v[N]-VALIDATED.md`
    - After creating epics from a VRD, update the VRD's "Created Epics" section with the epic IDs for traceability.
-   - If a VRD has open questions or insufficient detail, do NOT contact the Requirements Team directly. Instead, request clarification via `devchain_request_human_feedback` — the human will bridge between teams.
+   - If a VRD has open questions or insufficient detail, add your question to the VRD's **"Dev Team Questions"** section (artifact-based feedback). The Requirements Lead monitors this section and will answer or escalate. Only use `devchain_request_human_feedback` if the question is blocking and remains unanswered.
 
-3. **If NO external team detected (standalone mode):**
+4. **If NO external team detected (standalone mode):**
    - Operate normally — run the full planning pipeline including intake and internal BA/SubBSM validation.
 
-**Rationale:** The Development Team can operate either standalone (handling everything) or alongside a Requirements Team (consuming VRDs). This detection ensures the right mode without manual configuration.
+**Rationale:** `.team-owner.json` is canonical. `PROCESS.md` is the human-readable mirror. Drift between them triggers a fail-safe to prevent incorrect mode selection.
 
 1. **Discuss to create Draft Plan → Execute Parallel Validation with SubBSM + Business Analyst (Section 1.5) → Present the final plan for approval: to the USER if user-initiated, or to Epic Manager if EM-initiated (see Section 1.5 step 5 for routing rules)**
 2. **If it’s a new project, wait for Master Plan approval then repeat Documentation validation** (Section 10)

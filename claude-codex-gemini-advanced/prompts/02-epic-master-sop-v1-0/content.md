@@ -92,17 +92,21 @@ Before processing any epics in a new project, verify specs infrastructure exists
 
 After Phase 0 verification, check if an external Requirements Team manages the specs pipeline:
 
-1. Check: Does `/specs/.team-owner.json` exist?
+1. **Check `.team-owner.json` (canonical source):** Does `/specs/.team-owner.json` exist?
    - If YES → read the file. If `"pipeline_mode": "external"`, an external Requirements Team is active.
    - If NO → check `/specs/PROCESS.md` for `Pipeline Mode: external` header as fallback.
 
-2. **If external Requirements Team is detected:**
+2. **Drift detection:** If `.team-owner.json` and `PROCESS.md` disagree (one says external, the other doesn't, or one is missing while the other declares external), fail safe:
+   - Request human clarification via `devchain_send_message(recipient="user")`: "Specs pipeline ownership conflict: `.team-owner.json` and `PROCESS.md` disagree. Please confirm which team owns the specs pipeline."
+   - Wait for response before proceeding.
+
+3. **If external Requirements Team is detected:**
    - Do NOT notify BA about intake triage readiness — the Requirements Team handles intake.
    - VRDs will arrive in `/specs/validated/` from the external team.
    - The Brainstormer will detect this and consume VRDs directly.
    - Proceed with normal workflow — epics will be created from validated VRDs.
 
-3. **If NO external team detected (standalone mode):**
+4. **If NO external team detected (standalone mode):**
    - Notify BA: "Specs infrastructure ready. BA can begin triage."
    - Proceed with normal workflow.
 

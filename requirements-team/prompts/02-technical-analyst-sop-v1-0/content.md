@@ -155,21 +155,27 @@ When the Requirements Lead sends a draft VRD for validation:
 
 ---
 
-## 5.1) Requesting Human Feedback
+## 5.1) Requesting Clarification
 
 When you encounter ambiguous technical context that the codebase alone cannot clarify (e.g., undocumented architectural decisions, deprecated patterns with unclear replacements, external system behaviors):
 
-**Channel 1: Slack (`devchain_request_human_feedback`)** — PREFERRED
+**Primary channel: Requirements Lead** — send your question via `devchain_send_message` to the Requirements Lead. The Requirements Lead is the single point of contact with the human and will escalate if needed.
+
+**Emergency escalation only:** You may contact the human directly via `devchain_request_human_feedback` ONLY when:
+- The Requirements Lead is unresponsive (no reply after a reasonable wait)
+- The question is blocking and time-sensitive
+- You have already attempted to resolve it through the Requirements Lead
+
 ```
 devchain_request_human_feedback(sessionId={sessionId},
-  message="<your technical question>",
+  message="[ESCALATION] Technical Analyst question (Requirements Lead unresponsive): <your question>",
   context="<file path or area of code in question>",
-  urgency="normal")
+  urgency="high")
 ```
 
-**Channel 2: CLI (direct terminal output)** — output the question in your terminal for the human monitoring the console.
+You may also output the question in your CLI terminal for the human monitoring the console.
 
-**Rule:** Prefer routing questions through the Requirements Lead first. Only reach out to the human directly when the Requirements Lead cannot answer and the question is blocking your analysis.
+**Rule:** In normal operation, the Requirements Lead handles ALL human communication. This prevents duplicate or contradictory questions reaching the human from multiple agents.
 
 ---
 

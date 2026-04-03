@@ -203,6 +203,34 @@ When both analysts approve (or all critical issues are resolved):
 
 Use the template at `/specs/validated/_TEMPLATE-VRD.md`. Every VRD MUST include:
 
+### 4.1 Required Metadata Block
+
+Every VRD starts with an HTML comment containing machine-readable metadata. This is the **contract interface** — the Development Team relies on these fields:
+
+```html
+<!--
+  VRD Contract Metadata (machine-readable — do not remove)
+  feature_id: [unique-kebab-case-id]
+  version: [N]
+  status: DRAFT | VALIDATED | ARCHIVED
+  supersedes: [previous version filename or "none"]
+  target_repo: [repository path or name]
+  author: [agent or person name]
+  pipeline_mode: external
+  blocking_open_questions: true | false
+  ready_for_dev_team: true | false
+  schema_version: 1
+-->
+```
+
+**Critical fields for handoff:**
+- `ready_for_dev_team: true` — signals the VRD is consumable. Set to `false` if blocking open questions remain.
+- `blocking_open_questions` — if `true`, the Dev Team should NOT start planning until resolved.
+- `supersedes` — for version upgrades, reference the previous VRD filename so the Dev Team knows which one it replaces.
+- `target_repo` — tells the Dev Team where the implementation lives.
+
+### 4.2 Required Sections
+
 | Section | Required | Purpose |
 |---------|----------|---------|
 | Business Goal / User Problem | Yes | Why this matters |
@@ -210,19 +238,29 @@ Use the template at `/specs/validated/_TEMPLATE-VRD.md`. Every VRD MUST include:
 | Requirements Summary | Yes | What needs to be built |
 | Constraints / Non-Functional Requirements | Yes | Performance, security, compatibility |
 | Dependencies | Yes | What must exist first |
-| Acceptance Criteria (Happy Path) | Yes | Testable success criteria |
-| Acceptance Criteria (Edge Cases) | Yes | Error and boundary handling |
+| Functional Acceptance Criteria | Yes | User/business testable criteria (Given/When/Then) |
+| Technical Acceptance Criteria | Yes | Infrastructure/codebase testable criteria |
 | Out of Scope | Yes | Explicit exclusions |
-| Open Questions | If any | Unresolved items |
+| Open Questions | If any | Unresolved items with blocking flag |
+| Dev Team Questions | Yes (empty initially) | Artifact-based feedback channel |
 | Created Epics | Later | Filled by Development Team |
 
-### VRD Naming Convention
+**Acceptance Criteria split:**
+- **Functional Acceptance Criteria** — from Domain Analyst: user-facing behavior, business rules, edge cases (Given/When/Then)
+- **Technical Acceptance Criteria** — from Technical Analyst: performance, compatibility, infrastructure constraints
+
+### 4.3 VRD Naming Convention
 ```
 [FeatureName]-v[N]-[STATUS].md
 ```
 - `[FeatureName]` — PascalCase or hyphenated feature name
 - `v[N]` — integer version (v1, v2, v3...)
 - `[STATUS]` — DRAFT | VALIDATED | ARCHIVED
+
+### 4.4 Version Semantics
+- A new version **supersedes** the previous one. Set `supersedes:` in metadata.
+- Move the old version to `/specs/archived/validated/`.
+- The highest version with `-VALIDATED` in `/specs/validated/` is the source of truth.
 
 ---
 
@@ -305,7 +343,24 @@ devchain_request_human_feedback(sessionId={sessionId},
 - The validated VRD at `/specs/validated/` is the ONLY handoff artifact to the Development Team
 - The Development Team (Brainstormer) reads VRDs and decomposes into epics
 - No direct agent-to-agent communication between Requirements Team and Development Team
-- If the Development Team has questions, they go through the user (human-in-the-loop)
+
+### Dev Team Questions (Artifact-Based Feedback)
+The Development Team may add questions to the **"Dev Team Questions"** section inside a VRD. When you see new entries:
+1. Read the question and attempt to answer from source material and analyst knowledge
+2. If you can answer, update the VRD directly (fill in the Answer column)
+3. If you cannot answer, escalate to the human via `devchain_request_human_feedback` and update the VRD when resolved
+4. This avoids unnecessary human relay for questions the Requirements Team can handle directly
+
+### Team Deactivation Procedure
+If this Requirements Team is being removed from a project:
+1. **Verify no in-flight work:** Check `/specs/wip/` for draft VRDs. Complete or archive them.
+2. **Ensure VRD authority is clear:** The highest versioned `-VALIDATED` file in `/specs/validated/` must be the authoritative version.
+3. **Remove markers:** Delete `/specs/.team-owner.json` and remove the `Managed By` / `Pipeline Mode` headers from `/specs/PROCESS.md`.
+4. **Add handoff note** to `/specs/PROCESS.md`:
+   ```markdown
+   > **Handoff:** Requirements Team deactivated on YYYY-MM-DD. Pipeline ownership reverts to Development Team (Business Analyst).
+   ```
+5. **Notify user** via both Slack and CLI that the transition is complete and the Dev Team will auto-detect standalone mode on its next startup.
 
 ---
 

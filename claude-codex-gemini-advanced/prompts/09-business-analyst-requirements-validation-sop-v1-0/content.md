@@ -42,9 +42,10 @@ Upon assignment to a new project, verify the specs infrastructure exists before 
    - Verify `/specs/validated/_TEMPLATE-VRD.md` exists
 
 4. **Detect Requirements Team (Adaptive Mode):**
-   - Check: Does `/specs/.team-owner.json` exist?
+   - Check `.team-owner.json` (canonical source): Does `/specs/.team-owner.json` exist?
      - If YES → read the file. If `"pipeline_mode": "external"`, an external Requirements Team manages intake and VRD creation.
      - If NO → check `/specs/PROCESS.md` for `Pipeline Mode: external` header as fallback.
+   - **Drift detection:** If `.team-owner.json` and `PROCESS.md` disagree, fail safe — do NOT assume either mode. Output a warning in the CLI and wait for Brainstormer or Epic Manager to resolve (they run the same check with human escalation).
    - **If external Requirements Team is detected:**
      - You operate in **plan-validation-only mode**. Do NOT triage intake documents — the Requirements Team handles the full intake → VRD pipeline.
      - Your role is limited to validating Draft Plans from the Brainstormer (Section 3 analysis). This is your core function regardless of team configuration.
@@ -52,7 +53,7 @@ Upon assignment to a new project, verify the specs infrastructure exists before 
    - **If NO external team detected:**
      - Operate in full standalone mode — proceed with normal triage workflow including intake processing.
 
-**Rationale:** This ensures all projects have consistent specs handling infrastructure before requirements work begins, and the BA adapts its scope based on whether an external Requirements Team is active.
+**Rationale:** `.team-owner.json` is canonical. `PROCESS.md` is the human-readable mirror. Drift triggers a fail-safe. The BA adapts its scope based on whether an external Requirements Team is active.
 
 ---
 
