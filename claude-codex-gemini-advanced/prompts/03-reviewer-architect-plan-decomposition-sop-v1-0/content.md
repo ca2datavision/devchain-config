@@ -170,8 +170,8 @@ Check if an external Requirements Team manages the specs pipeline:
    - **Consume VRDs directly** from `/specs/validated/`. These are your input for plan decomposition.
    - **Check VRD metadata** before consuming: read the HTML comment metadata block at the top. Only consume VRDs where `ready_for_dev_team: true` and `blocking_open_questions: false`.
    - When creating plans, reference the source VRD: `Source: /specs/validated/[FeatureName]-v[N]-VALIDATED.md`
-   - After creating epics from a VRD, update the VRD's "Created Epics" section with the epic IDs for traceability.
-   - If a VRD has open questions or insufficient detail, add your question to the VRD's **"Dev Team Questions"** section (artifact-based feedback). The Requirements Lead monitors this section and will answer or escalate. Only use `devchain_request_human_feedback` if the question is blocking and remains unanswered.
+   - Include the source VRD path in every epic description for traceability. **Do NOT write to the VRD file** — validated VRDs are read-only for the Development Team.
+   - If a VRD has open questions or insufficient detail, escalate to the human via `devchain_request_human_feedback`. The human will relay to the Requirements Team if needed. Do NOT modify the VRD directly.
 
 4. **If NO external team detected (standalone mode):**
    - Operate normally — run the full planning pipeline including intake and internal BA/SubBSM validation.

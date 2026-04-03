@@ -242,8 +242,7 @@ Every VRD starts with an HTML comment containing machine-readable metadata. This
 | Technical Acceptance Criteria | Yes | Infrastructure/codebase testable criteria |
 | Out of Scope | Yes | Explicit exclusions |
 | Open Questions | If any | Unresolved items with blocking flag |
-| Dev Team Questions | Yes (empty initially) | Artifact-based feedback channel |
-| Created Epics | Later | Filled by Development Team |
+| Created Epics | Later | Filled by Requirements Lead when notified of epic creation |
 
 **Acceptance Criteria split:**
 - **Functional Acceptance Criteria** — from Domain Analyst: user-facing behavior, business rules, edge cases (Given/When/Then)
@@ -344,12 +343,8 @@ devchain_request_human_feedback(sessionId={sessionId},
 - The Development Team (Brainstormer) reads VRDs and decomposes into epics
 - No direct agent-to-agent communication between Requirements Team and Development Team
 
-### Dev Team Questions (Artifact-Based Feedback)
-The Development Team may add questions to the **"Dev Team Questions"** section inside a VRD. When you see new entries:
-1. Read the question and attempt to answer from source material and analyst knowledge
-2. If you can answer, update the VRD directly (fill in the Answer column)
-3. If you cannot answer, escalate to the human via `devchain_request_human_feedback` and update the VRD when resolved
-4. This avoids unnecessary human relay for questions the Requirements Team can handle directly
+### VRD Immutability
+Validated VRDs are **read-only for the Development Team**. The Dev Team reads VRDs for plan decomposition but never writes to them. If the Dev Team has questions about a VRD, they escalate to a human, who may relay the question to you. You are the only agent authorized to update validated VRDs (e.g., updating the "Created Epics" section when notified by the human that epics have been created).
 
 ### Team Deactivation Procedure
 If this Requirements Team is being removed from a project:
