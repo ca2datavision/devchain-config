@@ -17,7 +17,7 @@ Standalone CLI tooling -- two Python scripts that perform bidirectional transfor
 - Merges `prompt.json` + `content.md` back into single prompt objects (respecting `_keyOrder`)
 - Produces a byte-identical JSON file ready for Devchain import
 
-### Configuration Presets
+### Configuration Presets (under `teams/`)
 - `claude-codex-advanced` -- 6-agent Development Team, 2 providers (Claude, Codex/GPT)
 - `claude-codex-gemini-advanced` -- 9-agent Development Team, 3 providers (Claude, Codex/GPT, Gemini)
 - `requirements-team` -- 3-agent Requirements Team (Claude, Codex, Gemini) — produces validated VRDs consumed by the Dev Team

@@ -110,8 +110,8 @@ python3 -m py_compile decompose.py
 python3 -m py_compile compose.py
 
 # Verify round-trip fidelity
-python3 decompose.py claude-codex-advanced.json
-python3 compose.py claude-codex-advanced
+python3 decompose.py teams/claude-codex-advanced.json
+python3 compose.py teams/claude-codex-advanced
 # Diff should show no changes from the original JSON
 ```
 
@@ -132,23 +132,24 @@ No linter or formatter is currently configured. If added, prefer:
 devchain-config/
 ├── decompose.py                        # JSON -> directory
 ├── compose.py                          # Directory -> JSON
-├── claude-codex-advanced.json          # Composed 6-agent preset
-├── claude-codex-advanced/              # Decomposed 6-agent preset
-│   ├── _structure.json
-│   ├── manifest.json
-│   ├── config.json
-│   ├── statuses.json
-│   ├── prompts/
-│   ├── profiles/
-│   ├── agents/
-│   ├── watchers/
-│   └── subscribers/
-├── claude-codex-gemini-advanced.json   # Composed 9-agent preset
-├── claude-codex-gemini-advanced/       # Decomposed 9-agent preset
-│   └── (same structure)
-├── requirements-team.json             # Composed 3-agent Requirements Team preset
-├── requirements-team/                 # Decomposed Requirements Team preset
-│   └── (same structure)
+├── teams/                              # All team presets
+│   ├── claude-codex-advanced.json      # Composed 6-agent preset
+│   ├── claude-codex-advanced/          # Decomposed 6-agent preset
+│   │   ├── _structure.json
+│   │   ├── manifest.json
+│   │   ├── config.json
+│   │   ├── statuses.json
+│   │   ├── prompts/
+│   │   ├── profiles/
+│   │   ├── agents/
+│   │   ├── watchers/
+│   │   └── subscribers/
+│   ├── claude-codex-gemini-advanced.json  # Composed 9-agent preset
+│   ├── claude-codex-gemini-advanced/      # Decomposed 9-agent preset
+│   │   └── (same structure)
+│   ├── requirements-team.json          # Composed 3-agent Requirements Team preset
+│   └── requirements-team/             # Decomposed Requirements Team preset
+│       └── (same structure)
 ├── specs-flow-template/               # Specs pipeline template (VRD template, directory structure)
 ├── docs/                               # Project documentation
 ├── drafts/                             # Draft content (gitignored)
@@ -164,8 +165,8 @@ devchain-config/
 
 ### Where to Place New Features
 
-- New presets: create a new JSON at root, run `decompose.py` to generate the directory
-- New agents/profiles/prompts: add numbered JSON/directory entries in the appropriate subdirectory
+- New presets: create a new JSON under `teams/`, run `decompose.py` to generate the directory
+- New agents/profiles/prompts: add numbered JSON/directory entries in the appropriate subdirectory under `teams/`
 - Documentation: under `docs/`
 
 ## 11. Design Principles

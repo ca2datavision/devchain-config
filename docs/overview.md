@@ -24,13 +24,14 @@ Standalone utility repository (not a service or library). Two Python scripts ope
 
 | Directory | Purpose |
 |---|---|
-| `claude-codex-advanced/` | Decomposed 6-agent Development Team preset (Claude + Codex/GPT) |
-| `claude-codex-gemini-advanced/` | Decomposed 9-agent Development Team preset (Claude + Codex/GPT + Gemini) |
-| `requirements-team/` | Decomposed 3-agent Requirements Team preset (Claude + Codex + Gemini) — produces validated VRDs consumed by the Dev Team |
+| `teams/` | All team preset directories and their composed JSON files |
+| `teams/claude-codex-advanced/` | Decomposed 6-agent Development Team preset (Claude + Codex/GPT) |
+| `teams/claude-codex-gemini-advanced/` | Decomposed 9-agent Development Team preset (Claude + Codex/GPT + Gemini) |
+| `teams/requirements-team/` | Decomposed 3-agent Requirements Team preset (Claude + Codex + Gemini) — produces validated VRDs consumed by the Dev Team |
 | `specs-flow-template/` | Template for the specs pipeline directory structure (`/specs/intake/` → `/specs/validated/`) and VRD template |
-| `*/prompts/` | SOP Markdown files and metadata per agent role |
-| `*/profiles/` | Agent runtime configs (provider, model, CLI options) |
-| `*/agents/` | Named agent roles pointing to profiles |
-| `*/watchers/` | Screen monitors (detect compaction, rate limits) |
-| `*/subscribers/` | Event-driven automations (auto-recover, auto-compact) |
+| `teams/*/prompts/` | SOP Markdown files and metadata per agent role |
+| `teams/*/profiles/` | Agent runtime configs (provider, model, CLI options) |
+| `teams/*/agents/` | Named agent roles pointing to profiles |
+| `teams/*/watchers/` | Screen monitors (detect compaction, rate limits) |
+| `teams/*/subscribers/` | Event-driven automations (auto-recover, auto-compact) |
 | `drafts/` | Draft content (LinkedIn posts, etc.) |

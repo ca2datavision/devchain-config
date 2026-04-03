@@ -16,17 +16,35 @@ Devchain project presets are exported as monolithic JSON files. These are powerf
 
 ### Presets
 
+All presets live under `teams/`:
+
 | Preset | Description |
 |---|---|
-| `claude-codex-advanced` | Original preset from [Devchain](https://devchain.twitechlab.com/). 6 agents across Claude and Codex/GPT providers. |
-| `claude-codex-gemini-advanced` | Extended preset. 9 agents across 3 AI providers (Claude, Codex/GPT, Google Gemini). Optimized for autonomous operation. |
+| `claude-codex-advanced` | Original preset from [Devchain](https://devchain.twitechlab.com/). 6-agent Development Team across Claude and Codex/GPT providers. |
+| `claude-codex-gemini-advanced` | Extended preset. 9-agent Development Team across 3 AI providers (Claude, Codex/GPT, Google Gemini). Optimized for autonomous operation. |
+| `requirements-team` | 3-agent Requirements Team (Claude, Codex, Gemini). Produces validated VRDs consumed by the Development Team. |
 
-### Directory Structure (decomposed)
-
-Each `.json` file has an associated directory with the same name:
+### Directory Structure
 
 ```
-claude-codex-gemini-advanced/
+devchain-config/
+├── teams/                               # All team presets
+│   ├── claude-codex-advanced/           # 6-agent Dev Team
+│   ├── claude-codex-advanced.json
+│   ├── claude-codex-gemini-advanced/    # 9-agent Dev Team
+│   ├── claude-codex-gemini-advanced.json
+│   ├── requirements-team/              # 3-agent Requirements Team
+│   └── requirements-team.json
+├── specs-flow-template/                 # Specs pipeline template (VRD template, directory structure)
+├── decompose.py
+├── compose.py
+└── docs/
+```
+
+Each team directory has the same internal structure:
+
+```
+teams/claude-codex-gemini-advanced/
 ├── _structure.json              # Key ordering + source map (drives compose.py)
 ├── manifest.json                # Preset metadata (name, version, description)
 ├── config.json                  # Top-level settings (initial prompt, auto-clean, etc.)
@@ -39,16 +57,24 @@ claude-codex-gemini-advanced/
 │   │   └── ...
 │   └── ...                      # 11 SOPs total
 ├── profiles/                    # Agent runtime configs (provider, model, CLI options)
-│   ├── 01-architect-planner-opus.json
-│   └── ...                      # 10 profiles
 ├── agents/                      # Named roles pointing to profiles
-│   ├── 01-brainstormer.json
-│   └── ...                      # 9 agents
 ├── watchers/                    # Screen monitors (detect compaction, rate limits)
 └── subscribers/                 # Event-driven automations (auto-recover, auto-compact)
 ```
 
-## The Team (`claude-codex-gemini-advanced`)
+## The Teams
+
+### Requirements Team (`requirements-team`)
+
+3 agents that transform raw requirements into validated VRDs (Validated Requirements Documents):
+
+| # | Agent | Provider | Role |
+|---|---|---|---|
+| 1 | Requirements Lead | Claude | Orchestrates the team. Receives raw requirements, dispatches to analysts, synthesizes findings into VRDs, owns the VRD lifecycle. |
+| 2 | Technical Analyst | Codex/GPT | Analyzes requirements against the actual codebase — existing patterns, APIs, dependencies, technical constraints. |
+| 3 | Domain Analyst | Gemini | Analyzes requirements from the business/user perspective — user stories, business rules, edge cases, acceptance criteria. |
+
+### Development Team (`claude-codex-gemini-advanced`)
 
 9 agents across 3 AI providers:
 
@@ -64,25 +90,53 @@ claude-codex-gemini-advanced/
 | 8 | Manual QA | Claude | Exploratory testing, acceptance criteria verification, UI/UX validation via Playwright. |
 | 9 | Automated QA | Claude | Runs test suites, verifies builds, checks coverage, writes missing tests. |
 
-> **Heads up:** This 9-agent configuration is designed for **large, complex projects** where the upfront cost pays off in autonomous delivery. It will consume significant tokens across all three providers and requires active subscriptions to **Claude (Anthropic), Codex/ChatGPT (OpenAI), and Gemini (Google)**. For smaller projects, consider Devchain's built-in 3-agent preset (Planner, Coder, Reviewer) which ships with the platform, or the `claude-codex-advanced` preset with 6 agents as a middle ground.
+> **Heads up:** The 9-agent configuration is designed for **large, complex projects** where the upfront cost pays off in autonomous delivery. It will consume significant tokens across all three providers and requires active subscriptions to **Claude (Anthropic), Codex/ChatGPT (OpenAI), and Gemini (Google)**. For smaller projects, consider Devchain's built-in 3-agent preset (Planner, Coder, Reviewer) which ships with the platform, or the `claude-codex-advanced` preset with 6 agents as a middle ground.
+
+### Adaptive Team Detection
+
+The two teams can operate on the same project. When deployed together, the Requirements Team registers itself by writing `/specs/.team-owner.json` and a `Pipeline Mode: external` header in `/specs/PROCESS.md`. The Development Team auto-detects these markers on startup and adapts:
+
+- **External Requirements Team detected** — Dev Team skips intake/triage, consumes validated VRDs directly from `/specs/validated/`. VRDs are **read-only** for the Dev Team.
+- **No markers found** — Dev Team operates standalone with its own Business Analyst handling requirements internally.
+- **Drift between markers** — agents halt and escalate to the human rather than guessing.
+
+### Specs Pipeline (VRD Flow)
+
+When the Requirements Team is active, raw requirements flow through a structured pipeline:
+
+```
+/specs/intake/     Raw requirements arrive here
+       ▼
+/specs/wip/        VRDs being drafted and validated
+       ▼
+/specs/validated/  Validated VRDs — the handoff contract to the Dev Team
+       ▼
+/specs/archived/   Superseded versions and processed intake documents
+```
+
+The `specs-flow-template/` directory in this repo provides the template for this structure, including the VRD template with machine-readable metadata.
 
 ### Workflow
 
 ```
-Planning:    Brainstormer ──┬── SubBSM (technical validation)
-                            └── Business Analyst (requirements validation)  ── parallel
-                            └── User approval
+Requirements:  User ── Requirements Lead ──┬── Technical Analyst (codebase analysis)
+                                           └── Domain Analyst (business analysis)    ── parallel
+                                           └── VRD validated ── /specs/validated/
 
-Execution:   Epic Manager assigns ──┬── Coder 1 ──┐
-                                    └── Coder 2 ──┤  parallel
-                                                  ▼
-                                    Epic Manager reviews
-                                                  ▼
-                                    Automated QA ── Manual QA (if user-facing) ── Done
+Planning:      Brainstormer reads VRDs ──┬── SubBSM (technical validation)
+                                         └── Business Analyst (requirements validation)  ── parallel
+                                         └── User approval
 
-Code Review: Code Reviewer audits completed phases ── findings feed back as new tasks
+Execution:     Epic Manager assigns ──┬── Coder 1 ──┐
+                                      └── Coder 2 ──┤  parallel
+                                                    ▼
+                                      Epic Manager reviews
+                                                    ▼
+                                      Automated QA ── Manual QA (if user-facing) ── Done
 
-Backlog:     When team has capacity ── Epic Manager triages ── Brainstormer plans ── cycle repeats
+Code Review:   Code Reviewer audits completed phases ── findings feed back as new tasks
+
+Backlog:       When team has capacity ── Epic Manager triages ── Brainstormer plans ── cycle repeats
 ```
 
 ### Autonomy Features
@@ -98,7 +152,7 @@ Backlog:     When team has capacity ── Epic Manager triages ── Brainstor
 ### `decompose.py` — JSON to human-readable files
 
 ```bash
-python3 decompose.py claude-codex-gemini-advanced.json
+python3 decompose.py teams/claude-codex-gemini-advanced.json
 ```
 
 Splits a Devchain JSON preset into the directory structure above. Prompt content becomes editable Markdown files.
@@ -106,7 +160,7 @@ Splits a Devchain JSON preset into the directory structure above. Prompt content
 ### `compose.py` — human-readable files back to JSON
 
 ```bash
-python3 compose.py claude-codex-gemini-advanced
+python3 compose.py teams/claude-codex-gemini-advanced
 ```
 
 Reads the directory and produces a single JSON file ready to import into Devchain.
@@ -117,8 +171,8 @@ Decomposing a JSON and composing it back produces a **byte-identical** file. Edi
 
 ## Usage
 
-1. Edit SOPs, agents, profiles, or statuses in the decomposed directory
-2. Run `python3 compose.py <directory>` to rebuild the JSON
+1. Edit SOPs, agents, profiles, or statuses in the decomposed directory under `teams/`
+2. Run `python3 compose.py teams/<directory>` to rebuild the JSON
 3. Import the JSON into [Devchain](https://devchain.twitechlab.com/)
 
 ## Disclaimer

@@ -9,26 +9,26 @@
 
 ## Where to Make Changes Safely
 
-- **SOP content:** Edit `*/prompts/*/content.md` freely -- these are the agent instruction Markdown files
-- **Agent configuration:** Edit `*/agents/*.json` to change agent names, descriptions, or profile links
-- **Profiles:** Edit `*/profiles/*.json` to change AI provider, model, CLI options, or temperature
-- **Statuses:** Edit `*/statuses.json` to modify board columns
-- **Watchers/Subscribers:** Edit files in `*/watchers/` and `*/subscribers/` for automation config
+- **SOP content:** Edit `teams/*/prompts/*/content.md` freely -- these are the agent instruction Markdown files
+- **Agent configuration:** Edit `teams/*/agents/*.json` to change agent names, descriptions, or profile links
+- **Profiles:** Edit `teams/*/profiles/*.json` to change AI provider, model, CLI options, or temperature
+- **Statuses:** Edit `teams/*/statuses.json` to modify board columns
+- **Watchers/Subscribers:** Edit files in `teams/*/watchers/` and `teams/*/subscribers/` for automation config
 
 ## Do NOT Edit
 
-- `*/_structure.json` -- unless you understand the compose round-trip mechanism
-- `_keyOrder` arrays in `*/prompts/*/prompt.json` -- these preserve exact JSON key ordering
+- `teams/*/_structure.json` -- unless you understand the compose round-trip mechanism
+- `_keyOrder` arrays in `teams/*/prompts/*/prompt.json` -- these preserve exact JSON key ordering
 - Numbered prefixes on filenames -- changing these changes array ordering in composed output
 
 ## How to Run, Test, and Lint
 
 ```bash
 # Decompose
-python3 decompose.py <preset>.json
+python3 decompose.py teams/<preset>.json
 
 # Compose
-python3 compose.py <preset-directory>
+python3 compose.py teams/<preset-directory>
 
 # Verify round-trip (no formal test suite)
 diff original.json recomposed.json

@@ -15,10 +15,10 @@ The primary verification method is **round-trip fidelity**:
 
 ```bash
 # Example verification
-cp claude-codex-advanced.json claude-codex-advanced.json.bak
-python3 decompose.py claude-codex-advanced.json
-python3 compose.py claude-codex-advanced
-diff claude-codex-advanced.json claude-codex-advanced.json.bak
+cp teams/claude-codex-advanced.json teams/claude-codex-advanced.json.bak
+python3 decompose.py teams/claude-codex-advanced.json
+python3 compose.py teams/claude-codex-advanced
+diff teams/claude-codex-advanced.json teams/claude-codex-advanced.json.bak
 ```
 
 ## Coverage / Quality Gates
@@ -27,4 +27,4 @@ diff claude-codex-advanced.json claude-codex-advanced.json.bak
 
 ## Test Data / Fixtures
 
-- The three preset JSON files (`claude-codex-advanced.json`, `claude-codex-gemini-advanced.json`, `requirements-team.json`) serve as de facto test fixtures for round-trip verification
+- The three preset JSON files under `teams/` (`claude-codex-advanced.json`, `claude-codex-gemini-advanced.json`, `requirements-team.json`) serve as de facto test fixtures for round-trip verification

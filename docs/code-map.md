@@ -6,12 +6,13 @@
 |---|---|
 | `decompose.py` | CLI script: JSON preset -> decomposed directory |
 | `compose.py` | CLI script: decomposed directory -> JSON preset |
-| `claude-codex-advanced/` | Decomposed 6-agent Development Team preset |
-| `claude-codex-advanced.json` | Composed JSON for 6-agent preset |
-| `claude-codex-gemini-advanced/` | Decomposed 9-agent Development Team preset |
-| `claude-codex-gemini-advanced.json` | Composed JSON for 9-agent preset |
-| `requirements-team/` | Decomposed 3-agent Requirements Team preset |
-| `requirements-team.json` | Composed JSON for Requirements Team preset |
+| `teams/` | All team presets (decomposed directories + composed JSONs) |
+| `teams/claude-codex-advanced/` | Decomposed 6-agent Development Team preset |
+| `teams/claude-codex-advanced.json` | Composed JSON for 6-agent preset |
+| `teams/claude-codex-gemini-advanced/` | Decomposed 9-agent Development Team preset |
+| `teams/claude-codex-gemini-advanced.json` | Composed JSON for 9-agent preset |
+| `teams/requirements-team/` | Decomposed 3-agent Requirements Team preset |
+| `teams/requirements-team.json` | Composed JSON for Requirements Team preset |
 | `specs-flow-template/` | Template for specs pipeline directory structure and VRD template |
 | `drafts/` | Draft content (non-config, e.g. LinkedIn posts) |
 | `sop-*.md` | SOP audit/validation/simulation documents (root-level) |

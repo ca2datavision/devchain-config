@@ -23,24 +23,24 @@ No `pip install` required -- scripts use only the Python standard library.
 ### Decompose a Devchain JSON preset
 
 ```bash
-python3 decompose.py claude-codex-gemini-advanced.json
+python3 decompose.py teams/claude-codex-gemini-advanced.json
 ```
 
-Creates/overwrites the `claude-codex-gemini-advanced/` directory.
+Creates/overwrites the `teams/claude-codex-gemini-advanced/` directory.
 
 ### Compose a directory back to JSON
 
 ```bash
-python3 compose.py claude-codex-gemini-advanced
+python3 compose.py teams/claude-codex-gemini-advanced
 ```
 
-Writes `claude-codex-gemini-advanced.json` next to the directory.
+Writes `teams/claude-codex-gemini-advanced.json` next to the directory.
 
 ## How to Verify Round-Trip
 
 ```bash
-python3 decompose.py claude-codex-advanced.json
-python3 compose.py claude-codex-advanced
+python3 decompose.py teams/claude-codex-advanced.json
+python3 compose.py teams/claude-codex-advanced
 # The resulting JSON should be byte-identical to the original
-diff <(cat claude-codex-advanced.json) <(python3 -c "")  # or use sha256sum
+diff <(cat teams/claude-codex-advanced.json) <(python3 -c "")  # or use sha256sum
 ```
