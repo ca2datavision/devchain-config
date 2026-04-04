@@ -1,9 +1,9 @@
 {
   "id": "1e580c53-650c-41f7-ba49-0833a7788c25",
-  "name": "Compacted",
-  "description": null,
+  "name": "Compacted - Recovery Message",
+  "description": "Sends recovery instructions after context compaction",
   "enabled": true,
-  "eventName": "watcher.conversation.compact_requestnotified",
+  "eventName": "watcher.claude.compacted",
   "eventFilter": null,
   "actionType": "send_agent_message",
   "actionInputs": {
@@ -20,10 +20,10 @@
       "customValue": "true"
     }
   },
-  "delayMs": 0,
-  "cooldownMs": 5000,
+  "delayMs": 3000,
+  "cooldownMs": 60000,
   "retryOnError": false,
   "groupName": null,
   "position": 0,
-  "priority": 0
+  "priority": 10
 }

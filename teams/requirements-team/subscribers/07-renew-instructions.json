@@ -1,10 +1,14 @@
 {
-  "id": "7718a01a-8539-46fc-b375-2c823fe79ce5",
-  "name": "Compacted",
-  "description": null,
+  "id": "f6c2b8d0-9e37-4a6f-d30c-1b8c4f7a2e56",
+  "name": "Renew instructions",
+  "description": "Uses Claude native hooks to detect resume/clear/compact and send recovery instructions",
   "enabled": true,
-  "eventName": "watcher.conversation.compacted",
-  "eventFilter": null,
+  "eventName": "claude.hooks.session.started",
+  "eventFilter": {
+    "field": "source",
+    "operator": "regex",
+    "value": "resume|clear|compact"
+  },
   "actionType": "send_agent_message",
   "actionInputs": {
     "text": {
@@ -14,12 +18,16 @@
     "submitKey": {
       "source": "custom",
       "customValue": "Enter"
+    },
+    "immediate": {
+      "source": "custom",
+      "customValue": "false"
     }
   },
-  "delayMs": 5000,
-  "cooldownMs": 300000,
+  "delayMs": 3000,
+  "cooldownMs": 2000,
   "retryOnError": false,
   "groupName": null,
   "position": 0,
-  "priority": 0
+  "priority": 5
 }

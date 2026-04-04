@@ -3,7 +3,7 @@
   "name": "Continue on compact",
   "description": null,
   "enabled": true,
-  "eventName": "watcher.conversation.compacted",
+  "eventName": "watcher.claude.compacted",
   "eventFilter": null,
   "actionType": "send_agent_message",
   "actionInputs": {

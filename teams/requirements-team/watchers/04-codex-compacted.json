@@ -1,0 +1,17 @@
+{
+  "id": "d4a0f6b8-7c15-4e4d-b18a-9f6a2d5e0c34",
+  "name": "Codex Compacted",
+  "description": "Detects when Codex completes context compaction",
+  "enabled": true,
+  "scope": "provider",
+  "scopeFilterName": "codex",
+  "pollIntervalMs": 5000,
+  "viewportLines": 30,
+  "condition": {
+    "type": "contains",
+    "pattern": "Context compacted"
+  },
+  "cooldownMs": 60000,
+  "cooldownMode": "time",
+  "eventName": "watcher.codex.context_compacted"
+}

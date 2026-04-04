@@ -1,0 +1,33 @@
+{
+  "id": "c3f9e5a7-6b04-4d3c-a07f-8e5f1c4d9b23",
+  "name": "Renew instructions",
+  "description": "Uses Claude native hooks to detect resume/clear/compact and send recovery instructions",
+  "enabled": true,
+  "eventName": "claude.hooks.session.started",
+  "eventFilter": {
+    "field": "source",
+    "operator": "regex",
+    "value": "resume|clear|compact"
+  },
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    },
+    "immediate": {
+      "source": "custom",
+      "customValue": "false"
+    }
+  },
+  "delayMs": 3000,
+  "cooldownMs": 2000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 5
+}

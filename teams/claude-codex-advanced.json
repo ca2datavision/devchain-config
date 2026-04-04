@@ -303,20 +303,20 @@
   "watchers": [
     {
       "id": "3a3f251d-8d3d-4171-9b9c-50369394777d",
-      "name": "Compacted (ctrl+o to see full summary)",
-      "description": null,
-      "enabled": false,
+      "name": "Claude Compacted",
+      "description": "Detects when Claude completes context compaction",
+      "enabled": true,
       "scope": "provider",
       "scopeFilterName": "claude",
-      "pollIntervalMs": 60000,
-      "viewportLines": 20,
+      "pollIntervalMs": 5000,
+      "viewportLines": 30,
       "condition": {
-        "type": "contains",
-        "pattern": "ompacted (ctrl+o to see full summary)"
+        "type": "regex",
+        "pattern": "(?:Compacted \\(ctrl\\+o|Auto-compact: Compacting conversation|conversation has been compressed)"
       },
-      "cooldownMs": 30000,
+      "cooldownMs": 60000,
       "cooldownMode": "time",
-      "eventName": "watcher.conversation.compact_requestnotified"
+      "eventName": "watcher.claude.compacted"
     },
     {
       "id": "83e8035a-7a0c-4927-813c-852df906e5a2",
@@ -351,21 +351,38 @@
       "cooldownMs": 160000,
       "cooldownMode": "time",
       "eventName": "watcher.conversation.compact_request"
+    },
+    {
+      "id": "a1f7c3e8-4d92-4b1a-8e5f-6c3d9a2b7f01",
+      "name": "Codex Compacted",
+      "description": "Detects when Codex completes context compaction",
+      "enabled": true,
+      "scope": "provider",
+      "scopeFilterName": "codex",
+      "pollIntervalMs": 5000,
+      "viewportLines": 30,
+      "condition": {
+        "type": "contains",
+        "pattern": "Context compacted"
+      },
+      "cooldownMs": 60000,
+      "cooldownMode": "time",
+      "eventName": "watcher.codex.context_compacted"
     }
   ],
   "subscribers": [
     {
       "id": "1e580c53-650c-41f7-ba49-0833a7788c25",
-      "name": "Compacted",
-      "description": null,
-      "enabled": false,
-      "eventName": "watcher.conversation.compact_requestnotified",
+      "name": "Compacted - Recovery Message",
+      "description": "Sends recovery instructions after context compaction",
+      "enabled": true,
+      "eventName": "watcher.claude.compacted",
       "eventFilter": null,
       "actionType": "send_agent_message",
       "actionInputs": {
         "text": {
           "source": "custom",
-          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nRe-load your agent profile to refresh SOP instructions and continue working"
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile: devchain_get_agent_by_name(name='{{agentName}}')\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName='{{agentName}}')\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
         },
         "submitKey": {
           "source": "custom",
@@ -376,12 +393,12 @@
           "customValue": "true"
         }
       },
-      "delayMs": 0,
-      "cooldownMs": 5000,
+      "delayMs": 3000,
+      "cooldownMs": 60000,
       "retryOnError": false,
       "groupName": null,
       "position": 0,
-      "priority": 0
+      "priority": 10
     },
     {
       "id": "b4d34095-365c-48a7-9fcc-fe58c526f460",
@@ -461,6 +478,68 @@
       "groupName": null,
       "position": 0,
       "priority": 0
+    },
+    {
+      "id": "b2e8d4f6-5a93-4c2b-9f6e-7d4e0b3c8a12",
+      "name": "Codex Compacted - Recovery Message",
+      "description": "Sends recovery instructions after Codex context compaction",
+      "enabled": true,
+      "eventName": "watcher.codex.context_compacted",
+      "eventFilter": null,
+      "actionType": "send_agent_message",
+      "actionInputs": {
+        "text": {
+          "source": "custom",
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile: devchain_get_agent_by_name(name='{{agentName}}')\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName='{{agentName}}')\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
+        },
+        "submitKey": {
+          "source": "custom",
+          "customValue": "Enter"
+        },
+        "immediate": {
+          "source": "custom",
+          "customValue": "true"
+        }
+      },
+      "delayMs": 3000,
+      "cooldownMs": 60000,
+      "retryOnError": false,
+      "groupName": null,
+      "position": 0,
+      "priority": 10
+    },
+    {
+      "id": "c3f9e5a7-6b04-4d3c-a07f-8e5f1c4d9b23",
+      "name": "Renew instructions",
+      "description": "Uses Claude native hooks to detect resume/clear/compact and send recovery instructions",
+      "enabled": true,
+      "eventName": "claude.hooks.session.started",
+      "eventFilter": {
+        "field": "source",
+        "operator": "regex",
+        "value": "resume|clear|compact"
+      },
+      "actionType": "send_agent_message",
+      "actionInputs": {
+        "text": {
+          "source": "custom",
+          "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !"
+        },
+        "submitKey": {
+          "source": "custom",
+          "customValue": "Enter"
+        },
+        "immediate": {
+          "source": "custom",
+          "customValue": "false"
+        }
+      },
+      "delayMs": 3000,
+      "cooldownMs": 2000,
+      "retryOnError": false,
+      "groupName": null,
+      "position": 0,
+      "priority": 5
     }
   ]
 }

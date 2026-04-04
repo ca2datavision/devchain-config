@@ -1,0 +1,29 @@
+{
+  "id": "b2e8d4f6-5a93-4c2b-9f6e-7d4e0b3c8a12",
+  "name": "Codex Compacted - Recovery Message",
+  "description": "Sends recovery instructions after Codex context compaction",
+  "enabled": true,
+  "eventName": "watcher.codex.context_compacted",
+  "eventFilter": null,
+  "actionType": "send_agent_message",
+  "actionInputs": {
+    "text": {
+      "source": "custom",
+      "customValue": "Your agent session id (sessionId): {{sessionIdShort}}\nYour agent name: {{agentName}}\n! Important: Re-load your agent profile by using devchain_get_agent_by_name to refresh SOP instructions and continue working !\n\n[CONTEXT RECOVERY] Your conversation was compacted. Follow your SOP's Context Recovery Protocol:\n1. Re-load your agent profile: devchain_get_agent_by_name(name='{{agentName}}')\n2. Check your assigned tasks: devchain_list_assigned_epics_tasks(agentName='{{agentName}}')\n3. For each in-progress task, read the full epic and ALL comments to recover context\n4. Resume work from your last checkpoint comment"
+    },
+    "submitKey": {
+      "source": "custom",
+      "customValue": "Enter"
+    },
+    "immediate": {
+      "source": "custom",
+      "customValue": "true"
+    }
+  },
+  "delayMs": 3000,
+  "cooldownMs": 60000,
+  "retryOnError": false,
+  "groupName": null,
+  "position": 0,
+  "priority": 10
+}

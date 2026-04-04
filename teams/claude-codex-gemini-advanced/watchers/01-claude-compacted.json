@@ -1,0 +1,17 @@
+{
+  "id": "3a3f251d-8d3d-4171-9b9c-50369394777d",
+  "name": "Claude Compacted",
+  "description": "Detects when Claude completes context compaction",
+  "enabled": true,
+  "scope": "provider",
+  "scopeFilterName": "claude",
+  "pollIntervalMs": 5000,
+  "viewportLines": 30,
+  "condition": {
+    "type": "regex",
+    "pattern": "(?:Compacted \\(ctrl\\+o|Auto-compact: Compacting conversation|conversation has been compressed)"
+  },
+  "cooldownMs": 60000,
+  "cooldownMode": "time",
+  "eventName": "watcher.claude.compacted"
+}
