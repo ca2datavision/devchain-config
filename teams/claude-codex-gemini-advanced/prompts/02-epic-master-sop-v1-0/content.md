@@ -27,7 +27,7 @@
   * `devchain_create_epic(fields…)` — for creating backlog epics from review findings (Section 4).
   * `devchain_send_message(sessionId, recipientAgentNames=[...], message)` — for inter-agent communication. Use `recipient="user"` only for direct messages to the user. Do NOT use it as a notification for epic assignments — when `agentName` is updated on an epic, a notification is sent automatically by Devchain.
   * (Optional) Git viewer to inspect file diffs, commits, and change scope.
-* **States vocabulary (canonical):** `Backlog` → `Draft` → `New` → `In Progress` → `Review` → `QA` → `Done` (or `Blocked`). Side: `Archive`.
+* **States vocabulary (canonical):** `Backlog` → `Planning` → `Draft` → `New` → `In Progress` → `Review` → `QA` → `Done` (or `Blocked`). Side: `Archive`.
 * **⚠️ Done is TERMINAL.** Never move an epic from `Done` back to any other status. Never re-review, re-assign, or re-process a `Done` epic. If a `Done` epic needs rework, create a NEW epic referencing it.
 * **Always** be deterministic: follow the steps in order; never skip required checks.
 * **Be concise:** Suggestions must be important, non‑trivial, and avoid over‑engineering.

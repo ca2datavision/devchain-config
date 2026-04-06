@@ -179,7 +179,7 @@ Do NOT sit idle. Always notify Epic Manager when you have no work left.
 
 ---
 
-## 7) Self‑QA Checklist (run before moving to REVIEW)
+## 7) Self‑QA Checklist (run before moving to `Review`)
 
 * [ ] The implementation matches **only** the required scope.
 * [ ] All lints/type checks/tests pass locally; instructions to reproduce included.
