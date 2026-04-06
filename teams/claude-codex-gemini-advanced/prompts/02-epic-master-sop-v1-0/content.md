@@ -405,13 +405,15 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
    **Constraint:** Backlog sub-epics must be tasks or stories. If a sub-epic appears to be another phase epic, escalate to user for clarification.
 
 4. **After all sub-epics are dispositioned** (promoted to planning OR archived):
-   - Add summary comment to the backlog container:
+   - First, verify ALL sub-epics are in `Archive` or have `planning-requested` tag.
+   - Set backlog container status to `Archive`.
+   - **Only then** add summary comment (this enables idempotency check):
      ```
      Backlog closed. Disposition:
      - Promoted: N items
      - Closed: N items
      ```
-   - Set backlog container status to `Archive`.
+   - The "Backlog closed." prefix is the idempotency marker — do NOT add it prematurely.
 
 **Failure handling:** If interrupted mid-triage, leave backlog container open (status `Backlog`). Do NOT archive until all sub-epics are dispositioned.
 
