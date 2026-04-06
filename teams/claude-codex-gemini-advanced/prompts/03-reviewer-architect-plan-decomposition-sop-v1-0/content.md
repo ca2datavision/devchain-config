@@ -139,7 +139,8 @@ Section 1.4 — Pre-Draft Verification
 **Procedure:**
 
 1. **Receive item in Planning status:**
-   - The item has `Planning` status and a `planning-requested` tag.
+   - The item has `Planning` status (this is the trigger/contract — no tag required).
+   - Optional metadata: `planning-attempt:N` tag indicates retry count; timestamp comments track attempt history.
    - Read the item's description and context to understand the scope.
 
 2. **Proceed with normal planning:**
