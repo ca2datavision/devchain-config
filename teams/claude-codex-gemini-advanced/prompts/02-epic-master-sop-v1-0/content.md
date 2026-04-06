@@ -356,6 +356,7 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 2. **If verdict is APPROVED:**
    - If the epic has a `remediates:<parentId>` tag → this is a remediation epic. Mark it `Done`, then run **Section 6.6** for the referenced parent.
    - Otherwise → move the parent epic to `Done`: `devchain_update_epic(epic_id, {statusName: "Done"})`.
+   - **Then run Section 6.7 (Backlog Epic Cleanup)** to triage and archive the linked phase backlog.
    - REPEAT from step 7 to find next work.
 
 3. **If verdict is ISSUES FOUND (remediation needed):**
