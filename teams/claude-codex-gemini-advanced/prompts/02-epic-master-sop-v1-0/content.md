@@ -318,6 +318,7 @@ When a Coder sends a message saying they are available for new assignments:
 2. If backlog is empty → nothing to do.
 3. If backlog has items, **triage** them:
    - **Skip items tagged `planning-requested`** — these have already been sent to Brainstormer and are awaiting planning. **Stale detection:** When you encounter a `planning-requested` item, check its comments for the timestamp of the original planning request. If the request was sent more than 24 hours ago and no Brainstormer response has been received, re-send to Brainstormer (remove and re-add the `planning-requested` tag to reset).
+   - **Skip phase backlog containers** tagged `phaseId:*` UNLESS: (a) the referenced phase epic is `Done`, OR (b) the container has at least one non-archived child sub-epic. Phase backlog cleanup is handled by Section 6.7.
    - **Read each remaining item** — understand severity, business value, and effort.
    - **Group related items** that could form a coherent phase.
    - **Discard ONLY if the exact same work was already completed** — check if a Done epic covers the same scope. "Empty container" or "no sub-epics" does NOT mean obsolete — it means the item hasn't been planned yet. When in doubt, send to Brainstormer.
