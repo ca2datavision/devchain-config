@@ -132,6 +132,44 @@ Section 1.4 — Pre-Draft Verification
 
 ---
 
+## 1.7) Planning Status Handling
+
+**Trigger:** Epic Manager sends items in `Planning` status for decomposition (via Section 6.3 backlog review or Section 6.7 phase backlog cleanup).
+
+**Procedure:**
+
+1. **Receive item in Planning status:**
+   - The item has `Planning` status and a `planning-requested` tag.
+   - Read the item's description and context to understand the scope.
+
+2. **Proceed with normal planning:**
+   - Run Section 1.4 (Pre-Draft Verification) and Section 1.5 (Parallel Validation Loop).
+   - The Planning status indicates EM has triaged this item as ready for decomposition.
+
+3. **On successful planning:**
+   - **Create NEW phase epic(s)** with status `Draft` (per Section 3).
+   - The original Planning item remains unchanged during decomposition.
+   - **After creating phase epic(s)**, send confirmation to EM (already documented in Section 1.5 step 5):
+     ```
+     devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"],
+       message='{"message_type": "creation_confirmation", "plan_type": "backlog_plan", "source_backlog_item_ids": ["<original-planning-item-id>"], "created_epic_ids": ["<new-phase-epic-id>"]}')
+     ```
+   - EM will archive the original Planning item upon receiving this confirmation.
+
+4. **On planning failure/cancellation:**
+   - If planning cannot proceed (blockers, insufficient info, user cancels):
+   - Notify EM: `devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"], message='{"message_type": "planning_failed", "source_backlog_item_ids": ["<id>"], "reason": "<brief reason>"}')`
+   - EM will move the original item back to `Backlog` status for re-triage.
+
+**State Transitions:**
+- **Planning → (creates) Draft:** New phase epic is created in Draft status.
+- **Planning → Backlog:** Original item reverts if planning fails (handled by EM).
+- **Planning → Archive:** Original item archived after successful decomposition (handled by EM).
+
+**Important:** The `Planning` status applies to the ORIGINAL backlog item. Newly created phase epics always start in `Draft` status. Do NOT modify the original Planning item's status directly — EM handles lifecycle.
+
+---
+
 ## 2) High‑Level Flow to run for each identified Phase (Phase → Epics → Sub‑Epics)
 
 **0. Verify Phase 0 Completion (new projects only)**
