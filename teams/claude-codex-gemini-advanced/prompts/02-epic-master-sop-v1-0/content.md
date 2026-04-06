@@ -317,7 +317,9 @@ When a Coder sends a message saying they are available for new assignments:
 1. List backlog items: `devchain_list_epics(statusName=Backlog)`.
 2. If backlog is empty → nothing to do.
 3. If backlog has items, **triage** them:
-   - **Skip items tagged `planning-requested`** — these have already been sent to Brainstormer and are awaiting planning. **Stale detection:** When you encounter a `planning-requested` item, check its comments for the timestamp of the original planning request. If the request was sent more than 24 hours ago and no Brainstormer response has been received, re-send to Brainstormer (remove and re-add the `planning-requested` tag to reset).
+   - **Migration rule:** If an item has `planning-requested` tag (legacy), move it to `Planning` status and remove the tag: `devchain_update_epic(id, {statusName: "Planning", removeTags: ["planning-requested"]})`. This handles pre-existing tagged items during transition.
+   - **Skip items in `Planning` status** — these have already been sent to Brainstormer and are awaiting planning.
+   - **Stale detection for Planning items:** Also list items in `Planning` status: `devchain_list_epics(statusName=Planning)`. For each, check for `planning-attempt:N` tag. If N ≥ 3 OR item has been in Planning > 48 hours (check oldest comment timestamp), **escalate to user** via `devchain_send_message(recipient="user")`: "Backlog item [ID] has been in Planning for [N] attempts / [X] hours with no response. Please advise: retry, archive, or manual intervention?" Do NOT auto-retry beyond attempt 3.
    - **Skip phase backlog containers** tagged `phaseId:*` entirely — do NOT send to Brainstormer as backlog items. Instead:
      - If the referenced phase epic is `Done` → run Section 6.7 for that container, then continue backlog review.
      - If the referenced phase epic is NOT `Done` → skip (cleanup will trigger when phase completes via Section 6.5).
@@ -325,12 +327,20 @@ When a Coder sends a message saying they are available for new assignments:
    - **Group related items** that could form a coherent phase.
    - **Discard ONLY if the exact same work was already completed** — check if a Done epic covers the same scope. "Empty container" or "no sub-epics" does NOT mean obsolete — it means the item hasn't been planned yet. When in doubt, send to Brainstormer.
 4. **Default action: send to Brainstormer for planning.** Most backlog items exist because they represent future work. For actionable backlog items:
-   - Send the grouped items to **Brainstormer** via `devchain_send_message`:
+   - **Move item to Planning status:** `devchain_update_epic(id, {statusName: "Planning"})`. This makes the workflow visible on the board.
+   - **Track attempt number** with `planning-attempt:N` tag:
+     - **Single-tag rule:** At most ONE `planning-attempt:*` tag may exist per epic.
+     - First attempt: `devchain_update_epic(id, {addTags: ["planning-attempt:1"]})`.
+     - Retry: Remove existing tag, add incremented: `devchain_update_epic(id, {removeTags: ["planning-attempt:1"], addTags: ["planning-attempt:2"]})`.
+   - **Send planning request to Brainstormer** via `devchain_send_message`:
      > "The team has capacity. These backlog items are ready for planning: [list items with IDs and summaries]. Please validate with SubBSM (technical) and Business Analyst (requirements) before finalizing, then decompose into executable epics. Send me the final plan for approval — do not wait for user input."
-   - **Tag sent items as `planning-requested`** (`devchain_update_epic(id, {addTags: ["planning-requested"]})`). Keep status `Backlog`. This prevents re-sending on the next loop without polluting the Draft pipeline.
-   - **Post a timestamp comment** on each sent item: `devchain_add_epic_comment(id, "STATUS: PLANNING REQUESTED — sent to Brainstormer at <current date/time>")`. This comment enables stale detection (Section 6.3 step 3).
+   - **Post a timestamp comment** on each sent item: `devchain_add_epic_comment(id, "STATUS: PLANNING — sent to Brainstormer at <current date/time> (attempt N)")`.
    - The Brainstormer will run the full planning flow (Draft Plan → parallel SubBSM + BA validation → refined plan → EM approval) and create new phase epics.
 5. **Do NOT self-assign backlog items directly.** They must go through the planning process to get proper decomposition, validation, and acceptance criteria.
+
+6. **Planning status cleanup rules:**
+   - **Planning → Backlog** (item deferred or plan rejected): `devchain_update_epic(id, {statusName: "Backlog", removeTags: ["planning-attempt:1", "planning-attempt:2", "planning-attempt:3"]})`. This clears attempt tracking so the item starts fresh if re-triaged later.
+   - **Planning → Archive** (phase created or item obsolete): Handled by Section 6.4 Type B step 1. Cleans up both attempt tags and legacy `planning-requested` tags.
 
 ### 6.4) Brainstormer Messages (Message-Triggered)
 
@@ -344,7 +354,10 @@ Brainstormer sends two types of messages. Handle based on message type:
 
 **Type B — Creation Confirmation** `{message_type: "creation_confirmation", plan_type: "backlog_plan"|"remediation_plan", source_backlog_item_ids?: [...], created_epic_ids: [...]}`
 
-1. **If `plan_type` is `backlog_plan`:** `source_backlog_item_ids` is required — if missing, request resend from Brainstormer. Archive ONLY the backlog items listed in `source_backlog_item_ids`: `devchain_update_epic(id, {statusName: "Archive"})`. Do NOT archive any other backlog items.
+1. **If `plan_type` is `backlog_plan`:** `source_backlog_item_ids` is required — if missing, request resend from Brainstormer. Archive ONLY the backlog items listed in `source_backlog_item_ids` with cleanup:
+   - **Planning → Archive transition:** `devchain_update_epic(id, {statusName: "Archive", removeTags: ["planning-attempt:1", "planning-attempt:2", "planning-attempt:3", "planning-requested"]})`.
+   - This cleans up attempt tracking tags and any legacy `planning-requested` tags.
+   - Do NOT archive any other backlog items.
 2. **If `plan_type` is `remediation_plan`:** No backlog archival needed — remediation epics are linked via `remediates:<parentId>` tags.
 3. Step 7b/7c will pick up the newly created phase epics.
 4. REPEAT from step 7.
