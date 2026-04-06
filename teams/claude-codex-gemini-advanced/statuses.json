@@ -7,59 +7,66 @@
     "mcpHidden": false
   },
   {
+    "id": "08f63676-be4d-4308-966a-7307deae82cb",
+    "label": "Planning",
+    "color": "#17a2b8",
+    "position": 1,
+    "mcpHidden": false
+  },
+  {
     "id": "3e1bf6b2-8eab-4b83-97aa-24ef5190858f",
     "label": "Draft",
     "color": "#b0bec5",
-    "position": 1,
+    "position": 2,
     "mcpHidden": false
   },
   {
     "id": "235366f9-5a44-4421-b553-e452ef2743db",
     "label": "New",
     "color": "#6c757d",
-    "position": 2,
+    "position": 3,
     "mcpHidden": false
   },
   {
     "id": "3fa3ef63-7668-441c-a3a6-b3ada2829cbd",
     "label": "In Progress",
     "color": "#007bff",
-    "position": 3,
+    "position": 4,
     "mcpHidden": false
   },
   {
     "id": "20bf7f10-eef5-4707-838b-2a808cdce919",
     "label": "Review",
     "color": "#ffc107",
-    "position": 4,
+    "position": 5,
     "mcpHidden": false
   },
   {
     "id": "beafaa1a-c9d3-4796-8411-e5cdcf914723",
     "label": "QA",
     "color": "#17a2b8",
-    "position": 5,
+    "position": 6,
     "mcpHidden": false
   },
   {
     "id": "5c959995-b9be-4d93-96f7-ae0f0a72d25d",
     "label": "Done",
     "color": "#28a745",
-    "position": 6,
+    "position": 7,
     "mcpHidden": false
   },
   {
     "id": "9ab94d2c-072f-4dd0-b202-7fbc38f6dbc2",
     "label": "Blocked",
     "color": "#dc3545",
-    "position": 7,
+    "position": 8,
     "mcpHidden": false
   },
   {
     "id": "e6b8df73-f866-4a04-8abb-5d51e0b5692f",
     "label": "Archive",
     "color": "#000000",
-    "position": 8,
+    "position": 9,
     "mcpHidden": true
   }
 ]
