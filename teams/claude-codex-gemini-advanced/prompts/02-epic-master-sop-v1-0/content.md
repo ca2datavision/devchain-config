@@ -424,14 +424,14 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 
    | Priority | Criteria | Action |
    |----------|----------|--------|
-   | P1 (Security/correctness) | Bugs, vulnerabilities, data integrity | Verify not already in another active phase. If clear, **promote:** (1) Send planning request to Brainstormer via `devchain_send_message`: "Phase backlog cleanup: This P1 item requires planning: [ID and summary]. Please validate and decompose into executable epics." (2) Add `planning-requested` tag. (3) Post timestamp comment: `STATUS: PLANNING REQUESTED — sent to Brainstormer at <date/time>`. **Important:** Tag must only be added AFTER message is sent. |
-   | P2 (UX/performance) | User-facing improvements | Evaluate: User Impact (H/M/L) vs Engineering Effort (H/M/L). **If promoting (Impact ≥ Effort):** (1) Send planning request to Brainstormer via `devchain_send_message`. (2) Add `planning-requested` tag. (3) Post timestamp comment. **If closing (Impact < Effort):** set status to `Archive`, add comment with ROI rationale. |
+   | P1 (Security/correctness) | Bugs, vulnerabilities, data integrity | Verify not already in another active phase. If clear, **promote:** (1) Set status to `Planning` and add `planning-attempt:1` tag: `devchain_update_epic(id, {statusName: "Planning", addTags: ["planning-attempt:1"]})`. (2) Send planning request to Brainstormer via `devchain_send_message`: "Phase backlog cleanup: This P1 item requires planning: [ID and summary]. Please validate and decompose into executable epics." (3) Post timestamp comment: `STATUS: PLANNING REQUESTED — sent to Brainstormer at <date/time>`. |
+   | P2 (UX/performance) | User-facing improvements | Evaluate: User Impact (H/M/L) vs Engineering Effort (H/M/L). **If promoting (Impact ≥ Effort):** (1) Set status to `Planning` and add `planning-attempt:1` tag. (2) Send planning request to Brainstormer. (3) Post timestamp comment. **If closing (Impact < Effort):** set status to `Archive`, add comment with ROI rationale. |
    | P3 (Nice-to-have) | Polish, cleanup, minor enhancements | **Close:** set sub-epic status to `Archive`, add comment: `Deferred indefinitely: <brief reason>`. |
 
    **Constraint:** Backlog sub-epics must be tasks or stories. If a sub-epic appears to be another phase epic, escalate to user for clarification.
 
 4. **After all sub-epics are dispositioned** (promoted to planning OR archived):
-   - First, verify ALL sub-epics are in `Archive` or have `planning-requested` tag.
+   - First, verify ALL sub-epics are in `Archive` or `Planning` status.
    - Set backlog container status to `Archive`.
    - **Only then** add summary comment (this enables idempotency check):
      ```
