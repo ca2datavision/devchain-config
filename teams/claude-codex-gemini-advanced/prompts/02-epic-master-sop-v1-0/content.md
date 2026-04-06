@@ -368,6 +368,13 @@ Brainstormer sends two types of messages. Handle based on message type:
 3. Step 7b/7c will pick up the newly created phase epics.
 4. REPEAT from step 7.
 
+**Type C — Planning Failed** `{message_type: "planning_failed", source_backlog_item_ids: [...], reason: "..."}`
+
+1. **Move items back to Backlog:** For each ID in `source_backlog_item_ids`:
+   - `devchain_update_epic(id, {statusName: "Backlog", removeTags: ["planning-attempt:1", "planning-attempt:2", "planning-attempt:3"]})`.
+2. **Add rationale comment:** `devchain_add_epic_comment(id, "STATUS: PLANNING FAILED — <reason from message>. Returned to Backlog for re-triage.")`.
+3. REPEAT from step 7.
+
 ### 6.5) Code Review Completion (Message-Triggered)
 
 When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
