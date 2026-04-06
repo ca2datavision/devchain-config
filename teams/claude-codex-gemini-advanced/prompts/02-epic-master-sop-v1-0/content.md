@@ -375,6 +375,50 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
    - Step 7d will detect the `Review` epic without `code-review-pending` tag (removed in 6.5 step 1) and re-dispatch code review.
 4. **If remediation epics remain in progress** → wait. This check runs again when the next remediation epic completes.
 
+### 6.7) Backlog Epic Cleanup on Phase Completion
+
+**Trigger:** Phase Epic status changes to `Done` (via Section 6.5 step 2 after code review approval).
+
+**Procedure:**
+
+1. **Locate the linked phase backlog epic:**
+   - Search for epics with tag `phaseId:<completed-phase-epic-id>`.
+   - **Select the top-level backlog container:** Must have no `parentId`, title matching `BACKLOG: Phase …`, and status `Backlog`.
+   - If no match found → skip remaining steps.
+   - **Idempotency check:** If the backlog epic already has a comment starting with `Backlog closed.` → skip (already processed).
+
+2. **If backlog has no sub-epics (or all sub-epics are `Archive`):**
+   - Add comment: `Backlog closed. Auto-closed: Phase completed with no deferred items.`
+   - Set status to `Archive`.
+
+3. **If backlog has active sub-epics, triage each:**
+
+   | Priority | Criteria | Action |
+   |----------|----------|--------|
+   | P1 (Security/correctness) | Bugs, vulnerabilities, data integrity | Verify not already in another active phase. If clear, send to Brainstormer for planning via existing 6.3/6.4 flow. |
+   | P2 (UX/performance) | User-facing improvements | Evaluate: User Impact (H/M/L) vs Engineering Effort (H/M/L). Promote if Impact ≥ Effort; otherwise close with rationale. |
+   | P3 (Nice-to-have) | Polish, cleanup, minor enhancements | Close with comment: `Deferred indefinitely: <brief reason>`. Set status `Archive`. |
+
+   **Constraint:** Backlog sub-epics must be tasks or stories. If a sub-epic appears to be another phase epic, escalate to user for clarification.
+
+4. **After all sub-epics are dispositioned** (promoted to planning OR archived):
+   - Add summary comment to the backlog container:
+     ```
+     Backlog closed. Disposition:
+     - Promoted: N items
+     - Closed: N items
+     ```
+   - Set backlog container status to `Archive`.
+
+**Failure handling:** If interrupted mid-triage, leave backlog container open (status `Backlog`). Do NOT archive until all sub-epics are dispositioned.
+
+**Anti-patterns:**
+- Do NOT leave backlog open after phase completes.
+- Do NOT assign backlog epics to agents — Epic Manager owns lifecycle.
+- Do NOT create phase epics directly — use existing Brainstormer flow (6.3/6.4).
+
+**SLA:** Epic Manager must complete triage within 1 business day of phase completion.
+
 ---
 
 ## 7) Quality Checklist (use on every review)
