@@ -439,6 +439,57 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 
 ---
 
+### 6.8) Blocked Sub-Epic Resolution (Lifecycle Rule)
+
+**Trigger:** Sub-epic or parent epic is in `Blocked` status (detected in step 7c/7f, or reported by Coder).
+
+**Resolution Procedure:**
+
+1. **Check blocker validity:**
+   - Read the `STATUS: BLOCKED` comment for the blocker reason.
+   - Verify the referenced blocker is real and still open.
+   - **Invalid blockers (unblock immediately):**
+     - "Waiting for unrelated feature" — blocker not in dependency chain of this epic
+     - "Dependency on non-existent epic" — referenced epic ID doesn't exist
+     - "Blocked by completed work" — referenced epic is already `Done`
+   - If blocker is invalid → remove `Blocked` status, add comment explaining why, set status back to `In Progress` or `New`.
+
+2. **Attempt resolution:**
+   - Can the blocker be resolved without reassignment?
+   - If blocker is a clarification question → check if answer exists in comments or docs.
+   - If blocker is a dependency → check if dependency is actually completed.
+   - If resolvable → update the epic with resolution, remove `Blocked` status.
+
+3. **Reassignment (if resolution requires different agent):**
+   - Check agent availability: `devchain_list_agents(sessionId={sessionId})`.
+   - Review current agent workload before reassigning.
+   - If another agent can unblock → reassign with context comment.
+   - If no agent can resolve → proceed to escalation.
+
+4. **Escalation (48h timeline):**
+   - Check `STATUS: BLOCKED` comment timestamp.
+   - If blocked for >48 hours without resolution:
+     ```
+     devchain_send_message(sessionId={sessionId}, recipient="user",
+       message="Epic <id>: <title> has been Blocked for >48h. Blocker: <reason>. Attempted resolution: <what was tried>. Request: <specific help needed>.")
+     ```
+   - Add comment: `STATUS: ESCALATED — sent to user for resolution at <timestamp>`.
+
+**Circular Dependency Handling:**
+
+If Epic A blocks B AND Epic B blocks A (circular dependency):
+1. **Detect:** When resolving blocker for A, check if the blocker epic also lists A as its blocker.
+2. **Immediate escalation:** Do NOT attempt automated resolution.
+   ```
+   devchain_send_message(sessionId={sessionId}, recipient="user",
+     message="Circular dependency detected: Epic <A-id> blocks <B-id> AND <B-id> blocks <A-id>. Manual resolution required.")
+   ```
+3. Add comment to both epics: `STATUS: CIRCULAR DEPENDENCY — escalated to user`.
+
+**SLA:** Blocked items must be triaged within 4 hours of detection. Escalation at 48h is mandatory if unresolved.
+
+---
+
 ## 7) Quality Checklist (use on every review)
 
 * [ ] All acceptance criteria satisfied.
