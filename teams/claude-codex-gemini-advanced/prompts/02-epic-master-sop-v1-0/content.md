@@ -319,7 +319,13 @@ When a Coder sends a message saying they are available for new assignments:
 3. If backlog has items, **triage** them:
    - **Migration rule:** If an item has `planning-requested` tag (legacy), move it to `Planning` status and remove the tag: `devchain_update_epic(id, {statusName: "Planning", removeTags: ["planning-requested"]})`. This handles pre-existing tagged items during transition.
    - **Skip items in `Planning` status** — these have already been sent to Brainstormer and are awaiting planning.
-   - **Stale detection for Planning items:** Also list items in `Planning` status: `devchain_list_epics(statusName=Planning)`. For each, check for `planning-attempt:N` tag. If N ≥ 3 OR item has been in Planning > 48 hours (check oldest comment timestamp), **escalate to user** via `devchain_send_message(recipient="user")`: "Backlog item [ID] has been in Planning for [N] attempts / [X] hours with no response. Please advise: retry, archive, or manual intervention?" Do NOT auto-retry beyond attempt 3.
+   - **Stale detection for Planning items:** Also list items in `Planning` status: `devchain_list_epics(statusName=Planning)`. For each item, apply the **multi-attempt escalation policy**:
+     - **Age check:** Use `epic.updatedAt` to determine staleness. Item is stale if `now - updatedAt > 24 hours`.
+     - **Unassigned items:** If the Planning item has no `agentName` AND is stale (>24h), escalate immediately — unassigned items cannot progress without intervention.
+     - **Assigned items with retries available:** If `planning-attempt:N` tag exists with N < 3 AND item is stale, increment to `planning-attempt:N+1` and re-send to Brainstormer (see step 4). This gives Brainstormer up to 3 attempts at 24h intervals.
+     - **Max retries exhausted:** If N ≥ 3 AND item is stale, **escalate to user** via `devchain_send_message(recipient="user")` with full context:
+       > "Planning item [ID] '[title]' has exhausted 3 planning attempts over [X] hours with no actionable plan produced. Original request: [first 200 chars of description]. Please advise: (1) retry with different approach, (2) archive as not actionable, or (3) manual intervention required."
+     - Do NOT auto-retry beyond attempt 3 — human judgment needed for persistent failures.
    - **Skip phase backlog containers** tagged `phaseId:*` entirely — do NOT send to Brainstormer as backlog items. Instead:
      - If the referenced phase epic is `Done` → run Section 6.7 for that container, then continue backlog review.
      - If the referenced phase epic is NOT `Done` → skip (cleanup will trigger when phase completes via Section 6.5).
