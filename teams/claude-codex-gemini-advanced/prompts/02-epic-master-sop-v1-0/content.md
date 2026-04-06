@@ -318,7 +318,9 @@ When a Coder sends a message saying they are available for new assignments:
 2. If backlog is empty → nothing to do.
 3. If backlog has items, **triage** them:
    - **Skip items tagged `planning-requested`** — these have already been sent to Brainstormer and are awaiting planning. **Stale detection:** When you encounter a `planning-requested` item, check its comments for the timestamp of the original planning request. If the request was sent more than 24 hours ago and no Brainstormer response has been received, re-send to Brainstormer (remove and re-add the `planning-requested` tag to reset).
-   - **Skip phase backlog containers** tagged `phaseId:*` UNLESS: (a) the referenced phase epic is `Done`, OR (b) the container has at least one non-archived child sub-epic. Phase backlog cleanup is handled by Section 6.7.
+   - **Skip phase backlog containers** tagged `phaseId:*` entirely — do NOT send to Brainstormer as backlog items. Instead:
+     - If the referenced phase epic is `Done` → run Section 6.7 for that container, then continue backlog review.
+     - If the referenced phase epic is NOT `Done` → skip (cleanup will trigger when phase completes via Section 6.5).
    - **Read each remaining item** — understand severity, business value, and effort.
    - **Group related items** that could form a coherent phase.
    - **Discard ONLY if the exact same work was already completed** — check if a Done epic covers the same scope. "Empty container" or "no sub-epics" does NOT mean obsolete — it means the item hasn't been planned yet. When in doubt, send to Brainstormer.
@@ -396,9 +398,9 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 
    | Priority | Criteria | Action |
    |----------|----------|--------|
-   | P1 (Security/correctness) | Bugs, vulnerabilities, data integrity | Verify not already in another active phase. If clear, send to Brainstormer for planning via existing 6.3/6.4 flow. |
-   | P2 (UX/performance) | User-facing improvements | Evaluate: User Impact (H/M/L) vs Engineering Effort (H/M/L). Promote if Impact ≥ Effort; otherwise close with rationale. |
-   | P3 (Nice-to-have) | Polish, cleanup, minor enhancements | Close with comment: `Deferred indefinitely: <brief reason>`. Set status `Archive`. |
+   | P1 (Security/correctness) | Bugs, vulnerabilities, data integrity | Verify not already in another active phase. If clear, **promote:** add `planning-requested` tag, post timestamp comment (`STATUS: PLANNING REQUESTED — sent to Brainstormer at <date/time>`), ensure status is `Backlog`. Brainstormer picks up via 6.3/6.4 flow. |
+   | P2 (UX/performance) | User-facing improvements | Evaluate: User Impact (H/M/L) vs Engineering Effort (H/M/L). **If promoting:** add `planning-requested` tag + timestamp comment, ensure status `Backlog`. **If closing:** set status to `Archive`, add comment with rationale. |
+   | P3 (Nice-to-have) | Polish, cleanup, minor enhancements | **Close:** set sub-epic status to `Archive`, add comment: `Deferred indefinitely: <brief reason>`. |
 
    **Constraint:** Backlog sub-epics must be tasks or stories. If a sub-epic appears to be another phase epic, escalate to user for clarification.
 
