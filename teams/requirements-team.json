@@ -5,7 +5,7 @@
     "description": "A multi-agent requirements analysis team that transforms raw requirements into validated, machine-readable VRDs (Validated Requirements Documents). Uses three specialized agents across Claude, Codex, and Gemini to analyze requirements from business, technical, and domain perspectives. Produces AI-ready specifications that serve as the handoff contract to the Development Team.",
     "version": "1.0.0",
     "minDevchainVersion": "0.4.0",
-    "category": "requirements",
+    "category": "planning",
     "tags": [
       "requirements",
       "vrd",
