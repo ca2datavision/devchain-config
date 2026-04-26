@@ -28,22 +28,22 @@
     {
       "name": "codex-regular",
       "providerName": "codex",
-      "options": "--model=gpt-5.2 --dangerously-bypass-approvals-and-sandbox"
+      "options": "--model=gpt-5.2 --dangerously-bypass-approvals-and-sandbox --permission-mode plan"
     },
     {
       "name": "codex-high",
       "providerName": "codex",
-      "options": "--model=gpt-5.5 --dangerously-bypass-approvals-and-sandbox"
+      "options": "--model=gpt-5.5 --dangerously-bypass-approvals-and-sandbox --permission-mode plan"
     },
     {
       "name": "gemini-regular",
       "providerName": "gemini",
-      "options": "--model gemini-2.5-pro --approval-mode yolo"
+      "options": "--model gemini-2.5-pro --approval-mode yolo --permission-mode plan"
     },
     {
       "name": "gemini-high",
       "providerName": "gemini",
-      "options": "--model gemini-3.1-pro --approval-mode yolo"
+      "options": "--model gemini-3.1-pro --approval-mode yolo --permission-mode plan"
     }
   ]
 }
