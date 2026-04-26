@@ -2,5 +2,6 @@
   "id": "fa3aea72-69fd-445f-9fea-a30727a3a26e",
   "name": "Business Analyst",
   "profileId": "3a9df2bd-4641-4c40-a7f1-4173dcc9b553",
-  "description": "Responsible for requirements validation, acceptance criteria quality, edge case identification, and business risk analysis during the planning phase"
+  "description": "Responsible for requirements validation, acceptance criteria quality, edge case identification, and business risk analysis during the planning phase",
+  "providerConfigName": "default-gemini-2.5-pro"
 }

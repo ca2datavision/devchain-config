@@ -2,5 +2,6 @@
   "id": "45620df3-9f05-4166-acd9-3f6b6da73a7f",
   "name": "Automated QA",
   "profileId": "9d8d8bec-8088-4176-8bc3-ae697b7af980",
-  "description": "Responsible for running automated test suites, verifying builds, checking code coverage, writing missing tests, and CI/CD pipeline validation"
+  "description": "Responsible for running automated test suites, verifying builds, checking code coverage, writing missing tests, and CI/CD pipeline validation",
+  "providerConfigName": "default-claude-opus-4-5"
 }

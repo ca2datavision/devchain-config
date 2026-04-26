@@ -2,5 +2,6 @@
   "id": "4ecc3e9b-a46e-4464-ab28-f0c0ea0c171c",
   "name": "Epic Manager",
   "profileId": "d91bca23-ee61-486f-bec9-2d1314e6a885",
-  "description": null
+  "description": null,
+  "providerConfigName": "default-claude-opus-4-5"
 }

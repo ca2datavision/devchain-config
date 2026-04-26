@@ -2,5 +2,6 @@
   "id": "b2de6e7e-2d8c-49a4-80f4-5f3f767df572",
   "name": "Manual QA",
   "profileId": "7b9f793e-466f-440c-9ebb-5bf2899037f7",
-  "description": "Responsible for exploratory testing, acceptance criteria verification, UI/UX validation via Playwright, and business logic verification"
+  "description": "Responsible for exploratory testing, acceptance criteria verification, UI/UX validation via Playwright, and business logic verification",
+  "providerConfigName": "default-claude-opus-4-5"
 }
