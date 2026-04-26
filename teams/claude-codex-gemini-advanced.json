@@ -425,12 +425,12 @@
         {
           "name": "claude-regular",
           "providerName": "claude",
-          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+          "options": "--model claude-opus-4-5 --dangerously-skip-permissions"
         },
         {
           "name": "claude-high",
           "providerName": "claude",
-          "options": "--model claude-opus-4-7 --dangerously-skip-permissions --permission-mode plan"
+          "options": "--model claude-opus-4-7 --dangerously-skip-permissions"
         },
         {
           "name": "codex-regular",
