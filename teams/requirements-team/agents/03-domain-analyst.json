@@ -2,5 +2,6 @@
   "id": "a7926423-aa62-48c7-bd07-7e6286195579",
   "name": "Domain Analyst",
   "profileId": "9aea3f2a-0c55-4905-a4ff-153feca2dd2d",
-  "description": "Analyzes requirements from business and user perspective. Creates user stories, identifies edge cases, formulates acceptance criteria, and assesses business risks."
+  "description": "Analyzes requirements from business and user perspective. Creates user stories, identifies edge cases, formulates acceptance criteria, and assesses business risks.",
+  "providerConfigName": "default-gemini-2.5-pro"
 }

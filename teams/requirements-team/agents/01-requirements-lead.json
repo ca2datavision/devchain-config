@@ -2,5 +2,6 @@
   "id": "f2b45f90-590f-48db-adf0-31928c7e0b4f",
   "name": "Requirements Lead",
   "profileId": "4b08fb30-fc5b-49b2-a418-569d51d97ec8",
-  "description": "Orchestrates requirements analysis. Receives raw requirements, coordinates Technical and Domain Analysts, synthesizes findings into VRDs, manages validation cycles."
+  "description": "Orchestrates requirements analysis. Receives raw requirements, coordinates Technical and Domain Analysts, synthesizes findings into VRDs, manages validation cycles.",
+  "providerConfigName": "default-claude-opus-4-5"
 }
