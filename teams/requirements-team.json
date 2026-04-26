@@ -64,7 +64,44 @@
       "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan",
       "instructions": "[[prompt:Requirements Lead — SOP (v1.0)]]",
       "temperature": null,
-      "maxTokens": null
+      "maxTokens": null,
+      "providerConfigs": [
+        {
+          "name": "default-claude-opus-4-5",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "claude-regular",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "claude-high",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-7 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "codex-regular",
+          "providerName": "codex",
+          "options": "--model=gpt-5.2 --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "codex-high",
+          "providerName": "codex",
+          "options": "--model=gpt-5.5 --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "gemini-regular",
+          "providerName": "gemini",
+          "options": "--model gemini-2.5-pro --approval-mode yolo"
+        },
+        {
+          "name": "gemini-high",
+          "providerName": "gemini",
+          "options": "--model gemini-3.1-pro --approval-mode yolo"
+        }
+      ]
     },
     {
       "id": "7a9a2385-1684-4034-9423-2246e097a74f",
@@ -76,7 +113,44 @@
       "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
       "instructions": "[[prompt:Technical Analyst — SOP (v1.0)]]",
       "temperature": null,
-      "maxTokens": null
+      "maxTokens": null,
+      "providerConfigs": [
+        {
+          "name": "default-gpt-5.2",
+          "providerName": "codex",
+          "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "claude-regular",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "claude-high",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-7 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "codex-regular",
+          "providerName": "codex",
+          "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "codex-high",
+          "providerName": "codex",
+          "options": "--model=gpt-5.5 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "gemini-regular",
+          "providerName": "gemini",
+          "options": "--model gemini-2.5-pro --approval-mode yolo"
+        },
+        {
+          "name": "gemini-high",
+          "providerName": "gemini",
+          "options": "--model gemini-3.1-pro --approval-mode yolo"
+        }
+      ]
     },
     {
       "id": "9aea3f2a-0c55-4905-a4ff-153feca2dd2d",
@@ -88,7 +162,44 @@
       "options": "--model gemini-2.5-pro --approval-mode yolo",
       "instructions": "[[prompt:Domain Analyst — SOP (v1.0)]]",
       "temperature": null,
-      "maxTokens": null
+      "maxTokens": null,
+      "providerConfigs": [
+        {
+          "name": "default-gemini-2.5-pro",
+          "providerName": "gemini",
+          "options": "--model gemini-2.5-pro --approval-mode yolo"
+        },
+        {
+          "name": "claude-regular",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "claude-high",
+          "providerName": "claude",
+          "options": "--model claude-opus-4-7 --dangerously-skip-permissions --permission-mode plan"
+        },
+        {
+          "name": "codex-regular",
+          "providerName": "codex",
+          "options": "--model=gpt-5.2 --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "codex-high",
+          "providerName": "codex",
+          "options": "--model=gpt-5.5 --dangerously-bypass-approvals-and-sandbox"
+        },
+        {
+          "name": "gemini-regular",
+          "providerName": "gemini",
+          "options": "--model gemini-2.5-pro --approval-mode yolo"
+        },
+        {
+          "name": "gemini-high",
+          "providerName": "gemini",
+          "options": "--model gemini-3.1-pro --approval-mode yolo"
+        }
+      ]
     }
   ],
   "agents": [
@@ -96,19 +207,22 @@
       "id": "f2b45f90-590f-48db-adf0-31928c7e0b4f",
       "name": "Requirements Lead",
       "profileId": "4b08fb30-fc5b-49b2-a418-569d51d97ec8",
-      "description": "Orchestrates requirements analysis. Receives raw requirements, coordinates Technical and Domain Analysts, synthesizes findings into VRDs, manages validation cycles."
+      "description": "Orchestrates requirements analysis. Receives raw requirements, coordinates Technical and Domain Analysts, synthesizes findings into VRDs, manages validation cycles.",
+      "providerConfigName": "default-claude-opus-4-5"
     },
     {
       "id": "1e3ac103-e174-4593-97f4-18f0b8fe45ae",
       "name": "Technical Analyst",
       "profileId": "7a9a2385-1684-4034-9423-2246e097a74f",
-      "description": "Analyzes codebase for technical context relevant to requirements. Identifies existing patterns, APIs, dependencies, and technical constraints to inform VRD acceptance criteria."
+      "description": "Analyzes codebase for technical context relevant to requirements. Identifies existing patterns, APIs, dependencies, and technical constraints to inform VRD acceptance criteria.",
+      "providerConfigName": "default-gpt-5.2"
     },
     {
       "id": "a7926423-aa62-48c7-bd07-7e6286195579",
       "name": "Domain Analyst",
       "profileId": "9aea3f2a-0c55-4905-a4ff-153feca2dd2d",
-      "description": "Analyzes requirements from business and user perspective. Creates user stories, identifies edge cases, formulates acceptance criteria, and assesses business risks."
+      "description": "Analyzes requirements from business and user perspective. Creates user stories, identifies edge cases, formulates acceptance criteria, and assesses business risks.",
+      "providerConfigName": "default-gemini-2.5-pro"
     }
   ],
   "statuses": [
