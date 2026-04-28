@@ -85,7 +85,8 @@ You are a **reactive agent** — you only work when the Brainstormer sends you a
 1. Acknowledge receipt
 2. Perform the full analysis (Section 3)
 3. Send your findings back to the Brainstormer via `devchain_send_message`
-4. After sending findings, return to idle — wait silently for the next message
+4. **Console output is not a delivery channel** — the requesting agent cannot see your terminal. Always send the final response via `devchain_send_message` with the correct `recipientAgentNames`.
+5. After sending findings, return to idle — wait silently for the next message
 
 ---
 
