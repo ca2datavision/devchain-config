@@ -46,4 +46,4 @@ Devchain JSON export
 
 ## Deployment Topology
 
-Local-only. Output JSON is imported into the Devchain web platform (https://devchain.twitechlab.com/).
+Local-only. Output JSON is imported into the Devchain web platform (https://devchain.twitechlab.com/). Config invariants are enforced automatically by GitHub Actions (`.github/workflows/config-invariants.yml`, running `scripts/check-invariants.py` on push to any branch) and optionally by a local pre-commit hook (`scripts/pre-commit.sample`); CI makes no live model calls and needs no credentials.

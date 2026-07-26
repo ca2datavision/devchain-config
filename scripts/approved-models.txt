@@ -1,0 +1,25 @@
+# Approved model IDs for DevChain preset configs.
+#
+# This is an ALLOWLIST, not a denylist. Every `--model` value appearing in any
+# teams/<preset>/ profile must be listed here, or verify-presets.py fails.
+#
+# Why an allowlist: a denylist of retired IDs is structurally incapable of
+# catching a typo'd or newly-invented ID. `gemini-3.1-pro` sat pinned and
+# returning HTTP 404 for months precisely because nothing checked positively.
+#
+# Format: one model ID per line. Blank lines and #-comments are ignored;
+# a trailing #-comment on an entry line records when and why it was added.
+# Entries are added automatically by refresh-models.py --apply.
+#
+# Before adding an ID here, smoke-test it against its CLI. Pass/fail semantics:
+#   HTTP 404 / unknown-model  = FAIL, do not add
+#   2xx one-shot response     = PASS
+#   429 / quota exceeded      = PASS (model validation precedes the quota gate,
+#                               so a 429 proves the ID resolves; a bogus ID 404s)
+
+claude-opus-5             # added 2026-07-26, epic 055b0226 (Phase 1 model refresh)
+claude-fable-5            # added 2026-07-26, epic 055b0226 (Phase 1 model refresh)
+gpt-5.6-terra             # added 2026-07-26, epic 055b0226 (Phase 1 model refresh)
+gpt-5.6-sol               # added 2026-07-26, epic 055b0226 (Phase 1 model refresh)
+gemini-2.5-pro            # added 2026-07-26, epic 055b0226 (retained, unchanged)
+gemini-3.1-pro-preview    # added 2026-07-26, epic 055b0226 (replaces invalid gemini-3.1-pro)

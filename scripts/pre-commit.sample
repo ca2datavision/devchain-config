@@ -1,0 +1,41 @@
+#!/bin/sh
+# DevChain config invariants — local pre-commit hook.
+#
+# Install:
+#   ln -s ../../scripts/pre-commit.sample .git/hooks/pre-commit
+#   # or, if you prefer a copy:
+#   cp scripts/pre-commit.sample .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# Verify it is live:
+#   ls -l .git/hooks/pre-commit
+#
+# Bypass for a single commit (use sparingly, and never for a config change):
+#   git commit --no-verify
+#
+# Note for worktrees: `.git` is a FILE pointing at the real gitdir, and hooks
+# live in the COMMON gitdir shared by all worktrees. Install once from the
+# main checkout and every worktree picks it up:
+#   ln -s ../../scripts/pre-commit.sample "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+#
+# This hook checks the WORKING TREE, which is what you are about to commit.
+# It runs no network calls and needs no credentials.
+
+set -e
+
+# Only bother when something under teams/ or scripts/ is staged; editing a
+# README should not pay for a full invariant sweep.
+if git diff --cached --name-only | grep -qE '^(teams/|scripts/)'; then
+    root="$(git rev-parse --show-toplevel)"
+    echo "pre-commit: checking DevChain config invariants…"
+    if ! python3 "$root/scripts/check-invariants.py"; then
+        echo ""
+        echo "pre-commit: FAILED — config invariants violated. Commit aborted."
+        echo "  Re-run manually:  python3 scripts/check-invariants.py"
+        echo "  If you changed model pins, regenerate the composed JSON:"
+        echo "      python3 compose.py teams/<preset>"
+        echo "  Bypass (discouraged):  git commit --no-verify"
+        exit 1
+    fi
+fi
+
+exit 0

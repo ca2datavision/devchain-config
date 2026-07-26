@@ -1,0 +1,38 @@
+name: Config Invariants
+
+# Triggers cover DIRECT PUSHES TO ANY BRANCH, not just pull requests.
+# This repo has no PR workflow -- Phase 1's model refresh was committed
+# straight to a feature branch. A `pull_request`-only workflow would never
+# have fired on the very work these invariants exist to protect.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  invariants:
+    name: Four config invariants
+    runs-on: ubuntu-latest
+    steps:
+      # The scripts resolve the repo from their own location
+      # (Path(__file__).parent.parent) and shell out to git, so they must run
+      # from INSIDE a checkout. Copying them elsewhere yields
+      # "fatal: not a git repository".
+      - uses: actions/checkout@v4
+
+      # No setup-python step: ubuntu-latest ships python3, and these scripts
+      # are standard-library only by design (matching the repo's own
+      # "standard library only" principle). No pip, no cache, no credentials.
+      - name: Show python version
+        run: python3 --version
+
+      # Runs all four invariants against the FINAL TREE, then the verifier's
+      # own self-test. The self-test is deliberately not skipped: without it
+      # the invariant checks can rot into no-ops while this job stays green,
+      # which is indistinguishable from having no CI at all.
+      - name: Check config invariants
+        run: python3 scripts/check-invariants.py
