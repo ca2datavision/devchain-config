@@ -160,7 +160,7 @@ fi
 
 Use `if`/`else`, never `cmd && { ...; false; } || echo ...` — that shorthand parses as `(A && B) || C`, so the violation branch falls through to the success message and exits 0. Before trusting any gating check, run it with a deliberately foreign file staged and confirm it exits non-zero.
 
-* Re-run it against the commit afterwards (`git show --name-only --format='' HEAD`) — what landed is what matters, not what you intended to stage.
+* Re-run it against the commit afterwards (`git show --name-only --first-parent --format='' HEAD`) — what landed is what matters, not what you intended to stage. **Keep `--first-parent`:** without it the command prints nothing for a merge commit, so the check reports success having examined zero files — vacuous on exactly the commits most able to sweep in foreign files.
 * If the task has **no Declared Paths field**, do not guess. Ask the parent epic's owner to add one.
 * **State the revision you worked from** in your evidence comment: `git rev-parse HEAD` plus the branch and directory. Declaring paths does not tell a reviewer which revision you read, and a correctly-isolated but stale checkout produces confident, wrong results.
 * **Push your branch** — a task is not durably complete while its commits exist only on local disk. Plain fast-forward push; never force-push a published branch.

@@ -56,7 +56,7 @@ hazard (`903ee649`), verified as an *outcome* instead of trusted to staging disc
 
 ```bash
 # every file in the commit must be under this task's declared paths
-if git show --name-only --format='' <commit> | grep -v '^$' \
+if git show --name-only --first-parent --format='' <commit> | grep -v '^$' \
      | grep -v '^teams/<preset>\(/\|\.json$\)'; then
   echo "FOREIGN FILES ABOVE"; false
 else
@@ -64,9 +64,20 @@ else
 fi
 ```
 
-Written as `if`/`else` so a violation **exits non-zero**. The shorthand
-`cmd && echo "BAD" || echo "ok"` parses as `(A && B) || C` and always exits 0 — usable by a
-human reading output, useless to anything that checks a status code.
+Two details, each of which has already shipped broken once:
+
+- **`if`/`else`, not `cmd && echo "BAD" || echo "ok"`.** That shorthand parses as
+  `(A && B) || C` and always exits 0 — usable by a human reading output, useless to
+  anything that checks a status code.
+- **`--first-parent` is load-bearing.** Without it `git show --name-only` prints
+  **nothing for a merge commit**, so the check reports `isolated` and exits 0 having
+  examined zero files — vacuous on exactly the commits most able to sweep in foreign
+  files. `--first-parent` reports what the merge brought *onto* the branch, which is what
+  this check is asking. (`git diff-tree -r --name-only --no-commit-id` is blind the same
+  way.)
+
+The two are independent: the first controls how the result is *propagated*, the second what
+is *measured*. Fixing one leaves the other live.
 
 Run it against the commit you just made, not the staged index — the point is to check what
 actually landed. If your task declares multiple paths, extend the filter to all of them.

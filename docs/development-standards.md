@@ -268,12 +268,22 @@ fi
 Re-run it against the commit afterwards, because what landed is the thing that matters:
 
 ```bash
-if git show --name-only --format='' HEAD | grep -v '^$' | grep -Ev "$DECLARED"; then
+if git show --name-only --first-parent --format='' HEAD | grep -v '^$' \
+     | grep -Ev "$DECLARED"; then
   echo "FOREIGN FILES IN COMMIT"; false
 else
   echo "commit isolated"
 fi
 ```
+
+> **`--first-parent` is load-bearing — do not drop it.** Without it, `git show
+> --name-only` prints **nothing for a merge commit**, so the assertion reports
+> `commit isolated` and exits 0 having examined zero files. It is correct on ordinary
+> commits and silently vacuous on merges — which are precisely the commits most able to
+> sweep in foreign files. `--first-parent` reports what the merge brought *onto* this
+> branch, which is the question this assertion asks. (`-m` also produces output, but it
+> lists contents relative to each parent separately — a different measurement, not a
+> stricter one.)
 
 > **Use `if`/`else`, not `cmd && { …; false; } || echo …`.** That shorthand parses as
 > `(A && B) || C`: the `false` in the violation branch makes `||` fire, so the failure case
