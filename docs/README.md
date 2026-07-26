@@ -7,7 +7,7 @@ Human-readable, versionable configuration presets for Devchain -- an AI-powered 
 - **Languages:** Python 3 (tooling)
 - **Frameworks:** None (standalone CLI scripts)
 - **Content:** JSON configuration presets + Markdown SOPs
-- **Presets:** 3 (`claude-codex-advanced` with 6 agents, `claude-codex-gemini-advanced` with 9 agents, `requirements-team` with 3 agents)
+- **Presets:** 3 (`claude-codex-advanced` with 6 agents, `claude-codex-gemini-advanced` with 10 agents, `requirements-team` with 3 agents)
 - **Deployment:** Local tooling; output JSON imported into Devchain platform
 
 ## Table of Contents

@@ -49,24 +49,31 @@
     "mcpHidden": false
   },
   {
+    "id": "95a83dac-9f32-4896-8175-753c073c982d",
+    "label": "Conformance",
+    "color": "#8e44ad",
+    "position": 7,
+    "mcpHidden": false
+  },
+  {
     "id": "5c959995-b9be-4d93-96f7-ae0f0a72d25d",
     "label": "Done",
     "color": "#28a745",
-    "position": 7,
+    "position": 8,
     "mcpHidden": false
   },
   {
     "id": "9ab94d2c-072f-4dd0-b202-7fbc38f6dbc2",
     "label": "Blocked",
     "color": "#dc3545",
-    "position": 8,
+    "position": 9,
     "mcpHidden": false
   },
   {
     "id": "e6b8df73-f866-4a04-8abb-5d51e0b5692f",
     "label": "Archive",
     "color": "#000000",
-    "position": 9,
+    "position": 10,
     "mcpHidden": true
   }
 ]

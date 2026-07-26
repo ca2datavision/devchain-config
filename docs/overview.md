@@ -26,7 +26,7 @@ Standalone utility repository (not a service or library). Two Python scripts ope
 |---|---|
 | `teams/` | All team preset directories and their composed JSON files |
 | `teams/claude-codex-advanced/` | Decomposed 6-agent Development Team preset (Claude + Codex/GPT) |
-| `teams/claude-codex-gemini-advanced/` | Decomposed 9-agent Development Team preset (Claude + Codex/GPT + Gemini) |
+| `teams/claude-codex-gemini-advanced/` | Decomposed 10-agent Development Team preset (Claude + Codex/GPT + Gemini) |
 | `teams/requirements-team/` | Decomposed 3-agent Requirements Team preset (Claude + Codex + Gemini) — produces validated VRDs consumed by the Dev Team |
 | `specs-flow-template/` | Template for the specs pipeline directory structure (`/specs/intake/` → `/specs/validated/`) and VRD template |
 | `teams/*/prompts/` | SOP Markdown files and metadata per agent role |

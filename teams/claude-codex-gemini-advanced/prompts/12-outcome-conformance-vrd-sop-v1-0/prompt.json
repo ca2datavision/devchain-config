@@ -1,0 +1,15 @@
+{
+  "_keyOrder": [
+    "id",
+    "title",
+    "content",
+    "version",
+    "tags"
+  ],
+  "id": "202e10d3-ab3c-4018-aff7-f2c899bfed8d",
+  "title": "Outcome Conformance Reviewer — VRD Conformance & Drift SOP (v1.0)",
+  "version": 1,
+  "tags": [
+    "agent:profile:outcome-conformance"
+  ]
+}

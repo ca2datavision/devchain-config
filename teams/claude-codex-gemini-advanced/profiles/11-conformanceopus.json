@@ -1,0 +1,21 @@
+{
+  "id": "7d260afe-021d-4915-9f7a-7da15c2cfc58",
+  "name": "ConformanceReviewer",
+  "provider": {
+    "id": "provider-claude",
+    "name": "claude"
+  },
+  "options": "--model claude-opus-4-5 --dangerously-skip-permissions",
+  "instructions": "[[prompt:Outcome Conformance Reviewer — VRD Conformance & Drift SOP (v1.0)]]",
+  "temperature": null,
+  "maxTokens": null,
+  "providerConfigs": [
+    { "name": "default-claude-opus-4-5", "providerName": "claude", "options": "--model claude-opus-4-5 --dangerously-skip-permissions" },
+    { "name": "claude-regular", "providerName": "claude", "options": "--model claude-opus-4-5 --dangerously-skip-permissions" },
+    { "name": "claude-high", "providerName": "claude", "options": "--model claude-opus-4-7 --dangerously-skip-permissions" },
+    { "name": "codex-regular", "providerName": "codex", "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox" },
+    { "name": "codex-high", "providerName": "codex", "options": "--model=gpt-5.5 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox" },
+    { "name": "gemini-regular", "providerName": "gemini", "options": "--model gemini-2.5-pro --approval-mode yolo" },
+    { "name": "gemini-high", "providerName": "gemini", "options": "--model gemini-3.1-pro --approval-mode yolo" }
+  ]
+}

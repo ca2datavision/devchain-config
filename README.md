@@ -21,7 +21,7 @@ All presets live under `teams/`:
 | Preset | Description |
 |---|---|
 | `claude-codex-advanced` | Original preset from [Devchain](https://devchain.twitechlab.com/). 6-agent Development Team across Claude and Codex/GPT providers. |
-| `claude-codex-gemini-advanced` | Extended preset. 9-agent Development Team across 3 AI providers (Claude, Codex/GPT, Google Gemini). Optimized for autonomous operation. |
+| `claude-codex-gemini-advanced` | Extended preset. 10-agent Development Team across 3 AI providers (Claude, Codex/GPT, Google Gemini). Optimized for autonomous operation. |
 | `requirements-team` | 3-agent Requirements Team (Claude, Codex, Gemini). Produces validated VRDs consumed by the Development Team. |
 
 ### Directory Structure
@@ -31,7 +31,7 @@ devchain-config/
 ├── teams/                               # All team presets
 │   ├── claude-codex-advanced/           # 6-agent Dev Team
 │   ├── claude-codex-advanced.json
-│   ├── claude-codex-gemini-advanced/    # 9-agent Dev Team
+│   ├── claude-codex-gemini-advanced/    # 10-agent Dev Team
 │   ├── claude-codex-gemini-advanced.json
 │   ├── requirements-team/              # 3-agent Requirements Team
 │   └── requirements-team.json
@@ -76,7 +76,7 @@ teams/claude-codex-gemini-advanced/
 
 ### Development Team (`claude-codex-gemini-advanced`)
 
-9 agents across 3 AI providers:
+10 agents across 3 AI providers:
 
 | # | Agent | Provider | Role |
 |---|---|---|---|
@@ -89,8 +89,9 @@ teams/claude-codex-gemini-advanced/
 | 7 | Business Analyst | Gemini | Validates requirements completeness, acceptance criteria quality, and edge cases during planning. |
 | 8 | Manual QA | Claude | Exploratory testing, acceptance criteria verification, UI/UX validation via Playwright. |
 | 9 | Automated QA | Claude | Runs test suites, verifies builds, checks coverage, writes missing tests. |
+| 10 | Outcome Conformance Reviewer | Claude | Verifies each completed parent epic against its source VRD and stakeholder intent, classifies drift (implementation/specification/scope), and gates epic closure with a distilled conformance report. |
 
-> **Heads up:** The 9-agent configuration is designed for **large, complex projects** where the upfront cost pays off in autonomous delivery. It will consume significant tokens across all three providers and requires active subscriptions to **Claude (Anthropic), Codex/ChatGPT (OpenAI), and Gemini (Google)**. For smaller projects, consider Devchain's built-in 3-agent preset (Planner, Coder, Reviewer) which ships with the platform, or the `claude-codex-advanced` preset with 6 agents as a middle ground.
+> **Heads up:** The 10-agent configuration is designed for **large, complex projects** where the upfront cost pays off in autonomous delivery. It will consume significant tokens across all three providers and requires active subscriptions to **Claude (Anthropic), Codex/ChatGPT (OpenAI), and Gemini (Google)**. For smaller projects, consider Devchain's built-in 3-agent preset (Planner, Coder, Reviewer) which ships with the platform, or the `claude-codex-advanced` preset with 6 agents as a middle ground.
 
 ### Adaptive Team Detection
 
