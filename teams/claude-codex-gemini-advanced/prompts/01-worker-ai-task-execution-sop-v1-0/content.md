@@ -151,9 +151,14 @@ After completing a task or posting the evidence comment:
 
 ```
 DECLARED='^(path/one\.md|path/two\.json)$'          # from the task's Declared Paths
-git diff --cached --name-only | grep -Ev "$DECLARED" \
-  && { echo "FOREIGN FILES STAGED — do not commit"; false; } || echo "clean"
+if git diff --cached --name-only | grep -Ev "$DECLARED"; then
+  echo "FOREIGN FILES STAGED — do not commit"; false
+else
+  echo "clean: only Declared Paths staged"
+fi
 ```
+
+Use `if`/`else`, never `cmd && { ...; false; } || echo ...` — that shorthand parses as `(A && B) || C`, so the violation branch falls through to the success message and exits 0. Before trusting any gating check, run it with a deliberately foreign file staged and confirm it exits non-zero.
 
 * Re-run it against the commit afterwards (`git show --name-only --format='' HEAD`) — what landed is what matters, not what you intended to stage.
 * If the task has **no Declared Paths field**, do not guess. Ask the parent epic's owner to add one.

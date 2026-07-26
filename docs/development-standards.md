@@ -250,19 +250,32 @@ Its input is the task's **Declared Paths** field. Without that field the control
 nothing to filter against, which is why the field is mandatory in the sub-epic template.
 
 ```bash
-# fails loudly if anything outside the task's Declared Paths is staged
+# exits non-zero if anything outside the task's Declared Paths is staged
 DECLARED='^(docs/preset-changes\.md|docs/development-standards\.md)$'
-git diff --cached --name-only | grep -Ev "$DECLARED" \
-  && { echo "FOREIGN FILES STAGED — do not commit"; false; } \
-  || echo "clean: only Declared Paths staged"
+if git diff --cached --name-only | grep -Ev "$DECLARED"; then
+  echo "FOREIGN FILES STAGED — do not commit"; false
+else
+  echo "clean: only Declared Paths staged"
+fi
 ```
 
 Re-run it against the commit afterwards, because what landed is the thing that matters:
 
 ```bash
-git show --name-only --format='' HEAD | grep -v '^$' | grep -Ev "$DECLARED" \
-  && echo "FOREIGN FILES IN COMMIT" || echo "commit isolated"
+if git show --name-only --format='' HEAD | grep -v '^$' | grep -Ev "$DECLARED"; then
+  echo "FOREIGN FILES IN COMMIT"; false
+else
+  echo "commit isolated"
+fi
 ```
+
+> **Use `if`/`else`, not `cmd && { …; false; } || echo …`.** That shorthand parses as
+> `(A && B) || C`: the `false` in the violation branch makes `||` fire, so the failure case
+> prints the warning *and then* the success message and **exits 0** — an assertion that
+> cannot fail. This exact bug shipped in an earlier revision of this section and was caught
+> in review, not by the three people who ran it and saw `clean`. Whenever a check is meant
+> to gate something, test the violation branch: a staged foreign file must produce a
+> non-zero exit with no trailing success line.
 
 ### Untracked files are a separate sub-case
 

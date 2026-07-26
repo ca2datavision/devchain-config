@@ -56,10 +56,17 @@ hazard (`903ee649`), verified as an *outcome* instead of trusted to staging disc
 
 ```bash
 # every file in the commit must be under this task's declared paths
-git show --name-only --format='' <commit> | grep -v '^$' \
-  | grep -v '^teams/<preset>\(/\|\.json$\)' \
-  && echo "FOREIGN FILES ABOVE" || echo "isolated"
+if git show --name-only --format='' <commit> | grep -v '^$' \
+     | grep -v '^teams/<preset>\(/\|\.json$\)'; then
+  echo "FOREIGN FILES ABOVE"; false
+else
+  echo "isolated"
+fi
 ```
+
+Written as `if`/`else` so a violation **exits non-zero**. The shorthand
+`cmd && echo "BAD" || echo "ok"` parses as `(A && B) || C` and always exits 0 — usable by a
+human reading output, useless to anything that checks a status code.
 
 Run it against the commit you just made, not the staged index — the point is to check what
 actually landed. If your task declares multiple paths, extend the filter to all of them.
@@ -176,7 +183,11 @@ A sequential `sed` chain is precisely what produces `gemini-3.1-pro-preview-prev
 Always grep for doubled suffixes afterwards:
 
 ```bash
-grep -rn "preview-preview\|terra-terra\|sol-sol" teams/ && echo "CORRUPTION" || echo "clean"
+if grep -rn "preview-preview\|terra-terra\|sol-sol" teams/; then
+  echo "CORRUPTION"; false
+else
+  echo "clean"
+fi
 ```
 
 ## 7. Resolve agent pins through `profileId`
