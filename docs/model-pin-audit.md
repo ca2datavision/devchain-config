@@ -107,10 +107,44 @@ void and every 429 verdict in the ledger must be re-examined.
 | OpenAI | <https://platform.openai.com/docs/models> |
 | Anthropic | <https://docs.anthropic.com/en/docs/about-claude/models/overview> |
 
+### Match on an exact boundary — never a plain substring
+
 ```bash
 curl -s -o /tmp/doc.html -w 'HTTP=%{http_code}\n' -L --max-time 25 "<url>"
-grep -oF "<model-id>" /tmp/doc.html | wc -l
+
+python3 - "$MODEL_ID" <<'PY'
+import re, sys
+mid = sys.argv[1]
+text = open('/tmp/doc.html', errors='replace').read()
+# Same trailing-boundary rule as scripts/refresh-models.py. Without it,
+# `gemini-3.1-pro` matches inside `gemini-3.1-pro-preview`.
+print(len(re.findall(re.escape(mid) + r"(?![A-Za-z0-9._\-])", text)))
+PY
 ```
+
+**A plain `grep -F` here is wrong and has already produced a false positive.**
+`gemini-3.1-pro` is a strict prefix of `gemini-3.1-pro-preview`, so a substring
+search reports the retired ID as "present" when only its successor is listed.
+This is the project's signature trap — the same one that forces exact-boundary
+greps everywhere else, and that `scripts/refresh-models.py` solves with
+`re.escape(OLD) + (?![A-Za-z0-9._-])`. Reuse that rule; do not re-derive it.
+
+### Boundary matching is necessary but NOT sufficient — you are searching markup
+
+Even a boundary-correct count over raw HTML counts **markup**, not model
+listings. Observed on the real pages:
+
+| What matched | Example | Is it a model listing? |
+|---|---|---|
+| Heading anchor | `id="gemini-3.1-pro"` (slug of the heading "Gemini 3.1 Pro") | **No** |
+| Doc-page URL | `/gemini-api/docs/models/gemini-2.5-pro` | Indirectly |
+| Vendor-prefixed ID | `anthropic.claude-opus-5` (Bedrock form) | Yes, different namespace |
+| Embedded JSON payload | `{"id":"claude-opus-4-5@20251101"}` | Yes, versioned form |
+
+So a raw-HTML count answers *"does this string appear in the page source"*, not
+*"is this model listed as available"*. Treat the number as a **triage signal**:
+zero means look harder, non-zero means **read the rendered page** to see which
+section the entry sits in. Record the count *and* what it actually was.
 
 ### ⚠️ Finding class: SOURCE UNAVAILABLE
 
@@ -127,27 +161,43 @@ Fallback: try the provider's changelog/deprecations page, or the CLI's own model
 list. If still unavailable, record SOURCE UNAVAILABLE and carry it to the next
 audit — do not let it silently lapse.
 
-### ⚠️ Documentation presence is NOT proof of availability
+### ⚠️ Providers differ in how they treat withdrawn models
 
-Observed in the first audit (2026-07-26), and the reason Steps 1 and 2 are
-separate signals rather than one:
+This is the key thing to know before reading any Step 2 result. Verified on the
+real pages during the first audit (2026-07-26):
 
-- **`gemini-3.1-pro`** still appears in the canonical Gemini docs, yet the API
-  returns **404** for it. Docs lag reality.
-- **`claude-opus-4-5`** and **`claude-opus-4-7`** each still appear in the
-  Anthropic docs after retirement — deprecation and legacy tables keep listing
-  withdrawn models.
+| Provider | Withdrawn models are… | Evidence |
+|---|---|---|
+| **Google** | **removed** from the model list | `gemini-3.1-pro` (live 404) appears **nowhere** as a model ID — only a leftover heading anchor `id="gemini-3.1-pro"` |
+| **OpenAI** | **removed** | retired `gpt-5.2` and `gpt-5.5` → **0** boundary-matched occurrences |
+| **Anthropic** | **retained** under an explicit **"Legacy models"** heading | `claude-opus-4-5` and `claude-opus-4-7` still listed there |
 
-So:
+**A doc hit therefore means different things per provider:**
+
+- **Google / OpenAI** — the list reflects current availability, so **absence is
+  meaningful** and a hit is reasonable evidence the model is current.
+- **Anthropic** — **presence proves nothing on its own.** A superseded model is
+  still listed; you must check *which section* it sits in. A hit outside the
+  Legacy heading is the meaningful signal.
+
+Consequences for reading the two steps together:
 
 - A documentation hit **cannot clear** a model that fails Step 1.
 - A documentation miss **cannot condemn** a model that passes Step 1 — it may
-  simply be newer than the page, or listed under a different heading.
+  be newer than the page, or listed under a different heading.
+- **Step 1 remains the stronger signal.** Step 2's distinct value is catching
+  *announced* deprecations before they become 404s — the advance warning Step 1
+  structurally cannot give.
 
-Treat a Step 1 / Step 2 disagreement as a finding to investigate, not as
-something to average out. **Step 1 is the stronger signal**; Step 2 catches
-announced deprecations *before* they become 404s, which is exactly the warning
-Step 1 cannot give you in advance.
+Treat a Step 1 / Step 2 disagreement as a finding to investigate, never as
+something to average out.
+
+> **Note on the user's documentation-based ruling for Gemini.** Because Google
+> removes withdrawn models, a boundary-correct doc check *does* give a genuine
+> availability signal for Gemini — `gemini-3.1-pro` is absent, which is the
+> correct reading for a withdrawn model. That makes documentation-based
+> validation a stronger control for Gemini than for Anthropic, whose Legacy
+> table keeps superseded IDs visible indefinitely.
 
 ---
 
