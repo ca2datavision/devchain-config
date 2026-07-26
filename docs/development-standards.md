@@ -113,7 +113,7 @@ python3 -m py_compile compose.py
 # Verify round-trip fidelity (sources -> artifact) WITHOUT mutating the repo.
 # Never run decompose.py against teams/<preset>.json in-tree: it computes
 # out_dir = json_path.parent / json_path.stem and shutil.rmtree()s it
-# (decompose.py:127,129), which DELETES the tracked teams/<preset>/ directory.
+# (decompose.py:202,205), which DELETES the tracked teams/<preset>/ directory.
 SCRATCH=$(mktemp -d)
 git archive HEAD teams/claude-codex-advanced | tar -x -C "$SCRATCH"
 python3 compose.py "$SCRATCH/teams/claude-codex-advanced"
@@ -224,7 +224,7 @@ criterion.
 Both are specific to this repo's tooling and make a shared tree worse than it first appears:
 
 - **`decompose.py` destroys sibling work.** It calls `shutil.rmtree()` on its output
-  directory before writing (`decompose.py:127,129`). Anyone re-decomposing mid-flight
+  directory before writing (`decompose.py:202,205`). Anyone re-decomposing mid-flight
   destroys another task's uncommitted work in that directory outright.
 - **Even verification mutates the tree.** `compose.py` rewrites `teams/<preset>.json` **in
   place**, so a run intended as a read-only check modifies shared state.
