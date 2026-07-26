@@ -3,5 +3,5 @@
   "name": "Brainstormer",
   "profileId": "e080616d-5091-4ef8-bbc1-0680d6d4b4d0",
   "description": "responsible plan decommission, for epic creation",
-  "providerConfigName": "default-claude-opus-4-5"
+  "providerConfigName": "default-claude-opus-5"
 }

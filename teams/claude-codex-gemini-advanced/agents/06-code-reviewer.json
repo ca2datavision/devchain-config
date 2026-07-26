@@ -3,5 +3,5 @@
   "name": "Code Reviewer",
   "profileId": "4a9caab1-55a4-4a6b-853d-e2a1b9d996e2",
   "description": "responsible for code reviewer of completed phases",
-  "providerConfigName": "default-gpt-5.2"
+  "providerConfigName": "default-gpt-5.6-terra"
 }
