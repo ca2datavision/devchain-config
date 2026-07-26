@@ -275,6 +275,13 @@ Run it unquieted, in an `if`/`else`, exactly as written below.
 > Measured: the unquieted form below is correct; capturing to a variable or a file is
 > correct; `-q` and `> /dev/null` are not. CI is unaffected (no shim there), which means the
 > hazard is invisible in the environment you would reach for to check it.
+>
+> **The hazard is scoped to the interactive shell, not to hook execution.** The pre-commit
+> hook's own trigger uses `grep -qE` and is nonetheless sound: git runs hooks via `/bin/sh`,
+> where the shim is not defined and the real GNU grep resolves — verified in both directions
+> (`teams/` staged → fires; docs-only → does not). Same construct, different environment,
+> opposite verdict. So do not "fix" the hook's `-qE`, and do not conclude from it that this
+> warning is overcautious: it applies to the commands *you* type, not to what git executes.
 
 ```bash
 # exits non-zero if anything outside the task's Declared Paths is staged
