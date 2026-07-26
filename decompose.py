@@ -36,6 +36,7 @@ Directory layout produced:
 import json
 import re
 import shutil
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
@@ -115,7 +116,81 @@ def write_named_items(out_dir: Path, section: str, items: list):
 # Main
 # ---------------------------------------------------------------------------
 
-def decompose(json_path: str):
+def _git(args, cwd):
+    """Run a git command. Returns CompletedProcess, or None if git is absent."""
+    try:
+        return subprocess.run(["git", *args], cwd=str(cwd),
+                              capture_output=True, text=True)
+    except OSError:
+        return None
+
+
+def guard_rmtree(out_dir: Path, force: bool) -> None:
+    """Refuse to delete a git-TRACKED output directory that has local changes.
+
+    `decompose()` deletes `out_dir` outright before rewriting it. When that
+    directory is a tracked source tree, the delete is unrecoverable for
+    anything git is not already holding.
+
+    The protection is deliberately ASYMMETRIC — do not "fix" the third case:
+
+      tracked + dirty  -> REFUSE. Untracked (??) and ignored (!!) entries
+                          count as dirty precisely because they are the
+                          classes git cannot restore afterwards.
+      tracked + clean  -> proceed. Everything is recoverable from git.
+      untracked dir    -> proceed. Presumed scratch; this is the one fully
+                          unrecoverable path, left open on purpose so
+                          throwaway use stays frictionless.
+
+    Degrades gracefully: if git is unavailable, or `out_dir` is not inside a
+    repository, behaviour is identical to before this guard existed.
+    Never prompts — refusal is non-interactive so headless runs cannot hang.
+    """
+    if force:
+        return
+
+    cwd = out_dir.parent
+
+    tracked = _git(["ls-files", "--", str(out_dir)], cwd)
+    if tracked is None or tracked.returncode != 0:
+        return                        # git absent / not a repo -> pre-guard behaviour
+    if not tracked.stdout.strip():
+        return                        # untracked -> presumed scratch
+
+    status = _git(["status", "--porcelain", "--ignored", "--", str(out_dir)], cwd)
+    if status is None or status.returncode != 0:
+        return
+    dirty = [ln for ln in status.stdout.splitlines() if ln.strip()]
+    if not dirty:
+        return                        # tracked + clean -> git-recoverable
+
+    shown = dirty[:10]
+    more = len(dirty) - len(shown)
+    print(
+        f"Refusing to decompose: {out_dir} is tracked by git and has local changes.\n"
+        f"\n"
+        f"  RISK: decompose.py deletes this directory (shutil.rmtree) before\n"
+        f"  rewriting it. Uncommitted edits, untracked (??) and ignored (!!)\n"
+        f"  files inside it would be destroyed with NO recovery path — git\n"
+        f"  cannot restore untracked or ignored content.\n"
+        f"\n"
+        f"  Local changes ({len(dirty)}):\n"
+        + "".join(f"    {ln}\n" for ln in shown)
+        + (f"    … and {more} more\n" if more else "")
+        + f"\n"
+        f"  Commit or stash them first, or re-run with --force to delete anyway:\n"
+        f"    python3 {Path(sys.argv[0]).name} {json_path_display(out_dir)} --force",
+        file=sys.stderr,
+    )
+    sys.exit(2)
+
+
+def json_path_display(out_dir: Path) -> str:
+    """The <config.json> argument that produced this out_dir, for the hint."""
+    return f"{out_dir.name}.json"
+
+
+def decompose(json_path: str, force: bool = False):
     json_path = Path(json_path).resolve()
     if not json_path.exists():
         print(f"Error: {json_path} not found", file=sys.stderr)
@@ -126,6 +201,7 @@ def decompose(json_path: str):
 
     out_dir = json_path.parent / json_path.stem
     if out_dir.exists():
+        guard_rmtree(out_dir, force)
         shutil.rmtree(out_dir)
     out_dir.mkdir()
 
@@ -176,7 +252,10 @@ def decompose(json_path: str):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <config.json>", file=sys.stderr)
+    argv = sys.argv[1:]
+    force = "--force" in argv
+    positional = [a for a in argv if a != "--force"]
+    if len(positional) != 1:
+        print(f"Usage: {sys.argv[0]} <config.json> [--force]", file=sys.stderr)
         sys.exit(1)
-    decompose(sys.argv[1])
+    decompose(positional[0], force=force)
