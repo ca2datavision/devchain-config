@@ -5,19 +5,58 @@
 # docs/setup.md point here rather than repeating it, so there is one copy to
 # keep true.
 #
-# Install (idempotent — safe to re-run; `-f` replaces an existing link):
-#   ln -sfn ../../scripts/pre-commit.sample "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+# HOOK-VERSION: 2  (bump when this file changes; see "Staleness" below)
+#
+# Install — COPY, not a symlink. Idempotent; re-run to update:
+#   cp scripts/pre-commit.sample "$(git rev-parse --git-common-dir)/hooks/pre-commit" \
+#     && chmod +x "$(git rev-parse --git-common-dir)/hooks/pre-commit"
 #
 # Hooks live in the COMMON gitdir, which every worktree of this repo shares —
 # so ONE install covers the main checkout and every present and future
 # worktree. (In a worktree, `.git` is a FILE pointing at the real gitdir;
 # installing into `.git/hooks` from inside one would not work.)
 #
-# Verify it is live:
-#   ls -l "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+# Verify — DIFF the installed copy against this file. Do NOT use `ls -l`:
+#   diff "$(git rev-parse --git-common-dir)/hooks/pre-commit" scripts/pre-commit.sample \
+#     && test -x "$(git rev-parse --git-common-dir)/hooks/pre-commit" && echo "hook current"
 #
 # Uninstall:
 #   rm "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+#
+# WHY A COPY AND NOT A SYMLINK — measured, not theoretical:
+#
+#   A symlink into `scripts/` binds the hook to the WORKING TREE, so the hook
+#   becomes whatever the main checkout has checked out at the moment of each
+#   commit, in every worktree. `main` does not contain `scripts/` at all, so
+#   the link DANGLES there -- and:
+#
+#     GIT SILENTLY SKIPS A DANGLING HOOK. `git commit` exits 0, the commit is
+#     created, and there is NO warning, error or output. The `git checkout`
+#     that caused it is equally silent: it prints only "Switched to branch X".
+#
+#   So checking out the most ordinary branch in the repo would disable
+#   enforcement team-wide, with nothing anywhere reporting it. A copy is
+#   pinned at install time and immune to that.
+#
+#   A NON-EXECUTABLE HOOK IS ALSO SILENTLY SKIPPED -- same class, and reachable
+#   by a `chmod` sweep without anyone touching this file. That is why the
+#   install does `chmod +x` and the verify step tests `-x` explicitly. This
+#   repo has had file-mode churn before (Phase 1 flipped 18 files 644/755).
+#
+#   `ls -l` cannot see ANY of these: it reports that something is installed,
+#   not that the correct code will run. Presence, executability and content are
+#   three separate properties and git reports none of them at failure time.
+#
+# STALENESS — the cost of copying, stated plainly:
+#
+#   A copy does NOT update when this file changes. CHANGING THIS HOOK REQUIRES
+#   REINSTALLING IT, everywhere it is installed. The `diff` verify step above
+#   detects that, and HOOK-VERSION gives a quick eyeball check.
+#
+#   This is a real cost and it was chosen deliberately: a stale hook still RUNS
+#   and still CHECKS -- it is merely an older version, with CI on push as the
+#   authority. A dangling one does not run at all and says nothing. A stale
+#   check beats an absent one.
 #
 # Bypass for a single commit (use sparingly, and never for a config change):
 #   git commit --no-verify
