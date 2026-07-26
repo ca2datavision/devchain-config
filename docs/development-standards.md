@@ -118,6 +118,8 @@ python3 compose.py teams/claude-codex-advanced
 No linter or formatter is currently configured. If added, prefer:
 - Python: `ruff check --fix .` and `ruff format .`
 
+For any change to a preset under `teams/`, follow the checklist in [preset-changes.md](preset-changes.md) -- nine verification techniques, including the round-trip *direction* that actually catches drift and a destructive `decompose.py` hazard the commands above do not warn about.
+
 ## 9. Security and Compliance
 
 - **No secrets** stored in the repository
