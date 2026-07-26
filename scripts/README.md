@@ -9,6 +9,13 @@ principle in `docs/development-standards.md`.
 | `refresh-models.py` | Rewrite model pins across a preset directory |
 | `verify-presets.py` | Check the config invariants; exits non-zero on violation |
 | `approved-models.txt` | The model allowlist `verify-presets.py` checks against |
+| `pre-commit.sample` | Optional local hook running the invariants on `teams/`/`scripts/` staging |
+
+**Installing the hook:** it is **not** active until you install it, and installing is one
+command. The canonical instructions — install, verify, uninstall, bypass, and exactly what
+the hook does and does not check — live in the header comment of
+[`pre-commit.sample`](pre-commit.sample). They are not repeated here, so there is one copy
+to keep true.
 
 ---
 

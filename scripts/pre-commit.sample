@@ -1,23 +1,44 @@
 #!/bin/sh
 # DevChain config invariants — local pre-commit hook.
 #
-# Install:
-#   ln -s ../../scripts/pre-commit.sample .git/hooks/pre-commit
-#   # or, if you prefer a copy:
-#   cp scripts/pre-commit.sample .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# THIS HEADER IS THE CANONICAL INSTALL DOCUMENTATION. scripts/README.md and
+# docs/setup.md point here rather than repeating it, so there is one copy to
+# keep true.
+#
+# Install (idempotent — safe to re-run; `-f` replaces an existing link):
+#   ln -sfn ../../scripts/pre-commit.sample "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+#
+# Hooks live in the COMMON gitdir, which every worktree of this repo shares —
+# so ONE install covers the main checkout and every present and future
+# worktree. (In a worktree, `.git` is a FILE pointing at the real gitdir;
+# installing into `.git/hooks` from inside one would not work.)
 #
 # Verify it is live:
-#   ls -l .git/hooks/pre-commit
+#   ls -l "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+#
+# Uninstall:
+#   rm "$(git rev-parse --git-common-dir)/hooks/pre-commit"
 #
 # Bypass for a single commit (use sparingly, and never for a config change):
 #   git commit --no-verify
 #
-# Note for worktrees: `.git` is a FILE pointing at the real gitdir, and hooks
-# live in the COMMON gitdir shared by all worktrees. Install once from the
-# main checkout and every worktree picks it up:
-#   ln -s ../../scripts/pre-commit.sample "$(git rev-parse --git-common-dir)/hooks/pre-commit"
+# WHAT THIS CHECKS, PRECISELY — it matters, because the two differ:
 #
-# This hook checks the WORKING TREE, which is what you are about to commit.
+#   This hook checks the WORKING TREE. Git commits the STAGED INDEX. Under
+#   partial staging — which this repo's pathspec-staging rule makes the NORM,
+#   not the exception — those diverge, in BOTH directions:
+#
+#     FALSE BLOCK: your staged change is clean, but unstaged WIP elsewhere in
+#                  teams/ violates an invariant. The commit is refused for
+#                  something you were not committing.
+#     FALSE PASS:  your staged change violates an invariant, but the working
+#                  tree has already been fixed. The hook sees the fix and lets
+#                  it through.
+#
+#   CI on push is the authority; this hook is a fast local warning, not a
+#   guarantee. Index-accurate checking would need a staged-snapshot checkout
+#   and is deliberately not implemented here.
+#
 # It runs no network calls and needs no credentials.
 
 set -e
