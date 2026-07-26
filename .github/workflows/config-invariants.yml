@@ -36,3 +36,23 @@ jobs:
       # which is indistinguishable from having no CI at all.
       - name: Check config invariants
         run: python3 scripts/check-invariants.py
+
+      # DELIBERATELY A SEPARATE STEP, not folded into the one above. The two
+      # answer different questions and fail for unrelated reasons: the
+      # invariants say "the change you just made is inconsistent", this says
+      # "nobody has checked the pins against the outside world lately". A
+      # developer seeing one red step named for audit staleness beside a green
+      # invariants step diagnoses it in a second; the same failure buried in a
+      # combined step reads as "my change broke the config".
+      #
+      # This never runs the audit -- that needs provider credentials, which
+      # this workflow deliberately does not carry. It enforces only that
+      # someone has run it recently, which is the property a cadence is meant
+      # to guarantee and a calendar reminder cannot. `gemini-3.1-pro` sat
+      # 404-ing in production for months because the only signal was ignorable.
+      #
+      # Time-dependent by nature: the same commit is green today and red after
+      # the threshold with a zero-line diff. That is intended, and why the
+      # failure message opens by saying it is not caused by your change.
+      - name: Check model-pin audit freshness
+        run: python3 scripts/check-invariants.py --audit-staleness

@@ -54,13 +54,40 @@ audit runbook's job, not CI's.
 """
 
 import argparse
+import datetime
 import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 VERIFY = HERE / "verify-presets.py"
+
+# --- audit staleness ------------------------------------------------------
+# Separate concern from the four invariants, and deliberately a SEPARATE CI
+# step: the invariants judge the tree you just changed, this judges whether
+# anyone has recently checked the pins against the outside world. A developer
+# seeing one red step named for audit staleness beside green invariant steps
+# diagnoses it in a second.
+AUDIT_DIR = "docs/audits"
+
+# Cadence is monthly plus two event triggers (Epic Manager's decision, recorded
+# on epic 39de8b7b). 45 days leaves ~2 weeks of slack on a monthly cadence
+# before CI objects, so a slightly late audit does not red the build.
+AUDIT_STALE_DAYS = 45
+
+# Audit filenames are hand-typed. A future-dated typo (2027 for 2026) would
+# otherwise satisfy the freshness test forever and mask real staleness, so it
+# is its own failure. One day of tolerance absorbs timezone skew between an
+# author's local date and the UTC runner.
+AUDIT_FUTURE_TOLERANCE_DAYS = 1
+
+# Pattern-match FIRST, then date-validate. Anything not shaped exactly like
+# YYYY-MM-DD.md is not an audit entry and is ignored outright -- README.md and
+# any other companion file must be able to live in this directory without
+# being mistaken for one.
+AUDIT_NAME_RX = re.compile(r"^(\d{4})-(\d{2})-(\d{2})\.md$")
 
 # Historical ledger of withdrawn / superseded model IDs. Append when a model is
 # retired; never remove an entry -- the whole point is that a retired ID stays
@@ -129,12 +156,155 @@ def check_retired(root, ref):
     return violations
 
 
+def audit_entries(root, ref):
+    """Return (dates, ignored, dir_present) for docs/audits/.
+
+    Dates are parsed from FILENAMES, never from mtime. A git checkout does not
+    preserve mtime -- CI clones fresh, so every file looks written seconds ago
+    and an mtime-based check would report a three-year-old audit as current.
+
+    Precedence is pattern-match first, then date-validate: a name that is not
+    YYYY-MM-DD.md is `ignored` (a companion README is legitimate), whereas a
+    name that matches the shape but encodes an impossible date (2026-02-30) is
+    a typo, not an audit, and cannot count as the newest entry.
+    """
+    if ref:
+        proc = run(["git", "ls-tree", "--name-only", "%s:%s" % (ref, AUDIT_DIR)],
+                   cwd=str(root))
+        if proc.returncode != 0:
+            return [], [], False
+        names = [n.strip() for n in proc.stdout.splitlines() if n.strip()]
+    else:
+        d = root / AUDIT_DIR
+        if not d.is_dir():
+            return [], [], False
+        names = sorted(p.name for p in d.iterdir() if p.is_file())
+
+    dates, ignored = [], []
+    for name in names:
+        m = AUDIT_NAME_RX.match(name)           # 1. pattern
+        if not m:
+            ignored.append(name)
+            continue
+        try:                                     # 2. then validate
+            dates.append(datetime.date(int(m.group(1)), int(m.group(2)),
+                                       int(m.group(3))))
+        except ValueError:
+            ignored.append("%s (invalid date)" % name)
+    return dates, ignored, True
+
+
+def check_audit_staleness(root, ref, today=None):
+    """Audit-recency check. Returns (ok, lines).
+
+    Enforces only that SOMEONE HAS RUN THE AUDIT RECENTLY -- never what the
+    audit found. A ledger full of known-blocked entries is a perfectly valid
+    fresh audit. Runs no network calls and needs no credentials; checking the
+    pins against reality requires provider access and stays the runbook's job.
+    """
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    dates, ignored, present = audit_entries(root, ref)
+    lines = []
+    if ignored:
+        lines.append("ignored (not YYYY-MM-DD.md): %s" % ", ".join(ignored))
+
+    if not dates:
+        why = ("%s/ contains no YYYY-MM-DD.md entries" % AUDIT_DIR if present
+               else "%s/ does not exist" % AUDIT_DIR)
+        lines += [
+            "FAIL  no model-pin audit found — %s." % why,
+            "      This check enforces that the audit has been RUN recently.",
+            "      Remedy: follow docs/model-pin-audit.md, then commit its",
+            "      result as %s/%s.md" % (AUDIT_DIR, today.isoformat()),
+        ]
+        return False, lines
+
+    newest = max(dates)
+    age = (today - newest).days
+
+    if newest > today + datetime.timedelta(days=AUDIT_FUTURE_TOLERANCE_DAYS):
+        lines += [
+            "FAIL  future-dated audit file — check the filename.",
+            "      newest entry %s is later than today (%s, UTC)."
+            % (newest.isoformat(), today.isoformat()),
+            "      Audit filenames are hand-typed; a future date would satisfy",
+            "      this check forever and hide a genuinely stale audit.",
+            "      Remedy: rename %s/%s.md to the date the audit actually ran."
+            % (AUDIT_DIR, newest.isoformat()),
+        ]
+        return False, lines
+
+    if age > AUDIT_STALE_DAYS:
+        lines += [
+            "FAIL  this failure is NOT caused by your change — the model-pin "
+            "audit is stale.",
+            "      newest audit %s is %d days old (threshold %d)."
+            % (newest.isoformat(), age, AUDIT_STALE_DAYS),
+            "      Remedy: follow docs/model-pin-audit.md, then commit its",
+            "      result as %s/%s.md" % (AUDIT_DIR, today.isoformat()),
+            "      a fresh %s/%s.md may ride this PR."
+            % (AUDIT_DIR, today.isoformat()),
+        ]
+        return False, lines
+
+    lines.append("ok   newest audit %s, %d day(s) old (threshold %d)"
+                 % (newest.isoformat(), age, AUDIT_STALE_DAYS))
+    return True, lines
+
+
+def audit_self_test():
+    """Prove the staleness check still fails on each seeded violation class.
+
+    Same reasoning as the verifier's self-test: a check that passes everything
+    is indistinguishable from a check that checks nothing. Each case below must
+    be CAUGHT; the fresh and ignore cases must pass.
+    """
+    today = datetime.date(2026, 7, 26)          # fixed, so the suite is stable
+    cases = [
+        ("fresh audit passes",              ["2026-07-20.md"],                 True),
+        ("README coexists, still fresh",    ["2026-07-20.md", "README.md"],    True),
+        ("stale audit caught",              ["2026-01-01.md"],                 False),
+        ("empty audit dir caught",          [],                                False),
+        ("only non-matching files caught",  ["README.md", "notes.txt"],        False),
+        ("future-dated caught",             ["2027-01-01.md"],                 False),
+        ("invalid date not counted",        ["2026-02-30.md", "2026-01-01.md"], False),
+    ]
+    print("        AUDIT SELF-TEST — each violation case must be CAUGHT")
+    ok_all = True
+    with tempfile.TemporaryDirectory() as tmp:
+        base = pathlib.Path(tmp)
+        for label, names, expect_ok in cases:
+            case_root = base / label.replace(" ", "_")
+            (case_root / AUDIT_DIR).mkdir(parents=True)
+            for n in names:
+                (case_root / AUDIT_DIR / n).write_text("x\n")
+            ok, _ = check_audit_staleness(case_root, None, today=today)
+            good = (ok == expect_ok)
+            ok_all &= good
+            print("        [%s] %-34s expected %s" %
+                  ("PASS" if good else "FAIL", label,
+                   "GREEN" if expect_ok else "RED"))
+
+        # missing directory entirely (distinct from an empty one)
+        ok, _ = check_audit_staleness(base / "no_such_repo", None, today=today)
+        good = (ok is False)
+        ok_all &= good
+        print("        [%s] %-34s expected RED" %
+              ("PASS" if good else "FAIL", "missing audit dir caught"))
+
+    print("        AUDIT SELF-TEST %s" % ("PASSED" if ok_all else "FAILED"))
+    return ok_all
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--ref", default=None,
                     help="git ref to check (default: the working tree)")
     ap.add_argument("--no-self-test", action="store_true",
                     help="skip the verifier self-test (NOT recommended in CI)")
+    ap.add_argument("--audit-staleness", action="store_true",
+                    help="run ONLY the model-pin audit recency check "
+                         "(its own CI step; see docs/model-pin-audit.md)")
     args = ap.parse_args(argv)
 
     root = repo_root()
@@ -144,6 +314,31 @@ def main(argv=None):
               "(e.g. after actions/checkout), not from a copied directory.",
               file=sys.stderr)
         return 2
+
+    # --- audit staleness ----------------------------------------------------
+    # Deliberately its OWN mode and its own CI step, never folded into the
+    # invariants run. The two answer different questions and fail for unrelated
+    # reasons: the invariants say "your change is inconsistent", this says
+    # "nobody has checked the pins against reality lately". Merging them would
+    # make a stale audit look like a broken change.
+    if args.audit_staleness:
+        print("Model-pin audit freshness — %s" % (args.ref or "working tree"))
+        print("repo: %s\n" % root)
+        ok, lines = check_audit_staleness(root, args.ref)
+        for line in lines:
+            print("        %s" % line)
+        st_ok = True
+        if not args.no_self_test:
+            print("\n[self]  staleness-check self-test")
+            st_ok = audit_self_test()
+        print("\n" + "=" * 62)
+        if not ok or not st_ok:
+            print("RESULT: FAIL — %s" %
+                  ("stale/missing/future-dated model-pin audit" if not ok
+                   else "audit self-test"))
+            return 1
+        print("RESULT: PASS — model-pin audit is fresh; self-test green")
+        return 0
 
     print("DevChain config invariants — %s" % (args.ref or "working tree"))
     print("repo: %s\n" % root)
