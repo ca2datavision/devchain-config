@@ -280,6 +280,7 @@ Record this id backlog
 5. **Create explicit sub‑epics for Tests & Docs** for any user‑visible feature or API change.
 6. **Prereads section** always include docs/development-standards.md for coding tasks
 Include slugs of other related documents or just file path from the repository
+7. **Declared Paths is MANDATORY on every sub‑epic.** List every path the task may create, modify, or delete. It is the input to the Worker's pre‑commit foreign‑file assertion (development-standards §13) — omit it and the control has nothing to filter against. When sub‑epics run in parallel, their Declared Paths **must not overlap**; if two tasks genuinely need the same file, sequence them instead.
 
 **Sub‑Epic Template (use verbatim headings):**
 
@@ -298,6 +299,10 @@ Include slugs of other related documents or just file path from the repository
 ### File References
 - Path(s): <repo/path/file.py>
 - Line(s): <line numbers if known>
+
+### Declared Paths (MANDATORY)
+- <every path this task is permitted to create, modify, or delete — one per line>
+- <no globs unless the whole subtree is genuinely in scope>
 
 ### Prereads (Docs/Specs) if available:
 - Path(s): docs/{include other related documents to be aware of to complete the task}

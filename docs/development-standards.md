@@ -14,6 +14,7 @@
 - [10. Directory Layout](#10-directory-layout)
 - [11. Design Principles](#11-design-principles)
 - [12. Failure Handling and Resilience](#12-failure-handling-and-resilience)
+- [13. Parallel Task Isolation](#13-parallel-task-isolation)
 
 ---
 
@@ -109,10 +110,15 @@ Before submitting changes for review, run:
 python3 -m py_compile decompose.py
 python3 -m py_compile compose.py
 
-# Verify round-trip fidelity
-python3 decompose.py teams/claude-codex-advanced.json
-python3 compose.py teams/claude-codex-advanced
-# Diff should show no changes from the original JSON
+# Verify round-trip fidelity (sources -> artifact) WITHOUT mutating the repo.
+# Never run decompose.py against teams/<preset>.json in-tree: it computes
+# out_dir = json_path.parent / json_path.stem and shutil.rmtree()s it
+# (decompose.py:127,129), which DELETES the tracked teams/<preset>/ directory.
+SCRATCH=$(mktemp -d)
+git archive HEAD teams/claude-codex-advanced | tar -x -C "$SCRATCH"
+python3 compose.py "$SCRATCH/teams/claude-codex-advanced"
+cmp "$SCRATCH/teams/claude-codex-advanced.json" teams/claude-codex-advanced.json
+# cmp silent = sources and committed artifact agree
 ```
 
 No linter or formatter is currently configured. If added, prefer:
@@ -201,3 +207,101 @@ devchain-config/
 - **Failure mode:** Exit code 1 with stderr message on bad input; Python traceback on unexpected errors
 - **Data safety:** `decompose.py` calls `shutil.rmtree()` on output dir before writing -- always commit work before re-decomposing
 - **Idempotency:** Running decompose or compose multiple times on the same input produces identical results
+
+---
+
+## 13. Parallel Task Isolation
+
+When two or more tasks change the same repository at the same time, isolation must be a
+**mechanical control**, not discipline. Phase 1 ran two agents in one checkout and produced
+cleanly-scoped commits only because each independently chose to stage by pathspec. That is
+a good outcome from an uncontrolled process: a single `git add -A` by either would have
+cross-committed the other's in-flight work and silently failed the one-commit-per-preset
+criterion.
+
+### Two compounding hazards
+
+Both are specific to this repo's tooling and make a shared tree worse than it first appears:
+
+- **`decompose.py` destroys sibling work.** It calls `shutil.rmtree()` on its output
+  directory before writing (`decompose.py:127,129`). Anyone re-decomposing mid-flight
+  destroys another task's uncommitted work in that directory outright.
+- **Even verification mutates the tree.** `compose.py` rewrites `teams/<preset>.json` **in
+  place**, so a run intended as a read-only check modifies shared state.
+
+### The rule
+
+1. **Parallel same-repo tasks run in separate git worktrees.**
+   ```bash
+   git worktree add <path-outside-repo> -b <branch> <base-commit>
+   git worktree remove <path>          # when the task completes
+   ```
+2. **Where a worktree is not possible, stage by pathspec — never `git add -A`** — and run
+   the foreign-file assertion below before committing.
+3. **Run the foreign-file assertion regardless of which option you used.** A worktree
+   prevents collisions with *other tasks*; it does not stop you from staging a file your
+   own task never declared.
+4. **Remove your worktree when the task completes.** A leftover worktree becomes the stale
+   checkout that misleads the next agent (see below).
+
+### Foreign-file assertion (pre-commit)
+
+Its input is the task's **Declared Paths** field. Without that field the control has
+nothing to filter against, which is why the field is mandatory in the sub-epic template.
+
+```bash
+# fails loudly if anything outside the task's Declared Paths is staged
+DECLARED='^(docs/preset-changes\.md|docs/development-standards\.md)$'
+git diff --cached --name-only | grep -Ev "$DECLARED" \
+  && { echo "FOREIGN FILES STAGED — do not commit"; false; } \
+  || echo "clean: only Declared Paths staged"
+```
+
+Re-run it against the commit afterwards, because what landed is the thing that matters:
+
+```bash
+git show --name-only --format='' HEAD | grep -v '^$' | grep -Ev "$DECLARED" \
+  && echo "FOREIGN FILES IN COMMIT" || echo "commit isolated"
+```
+
+### Untracked files are a separate sub-case
+
+A new worktree is a **clean checkout** — untracked files in the main working tree do not
+appear in it. But a task can create untracked files *inside* its own worktree (scratch
+scripts, `__pycache__`, generated output), and `git add -A` there will sweep them in. This
+is why rule 3 requires the assertion even when worktrees are used: **worktrees solve
+concurrent edits to tracked files; only the assertion catches undeclared files.**
+
+### Declare the revision, not just the paths
+
+Declaring *paths* does not tell you *which revision* you are reading. Phase 2 lost a review
+cycle to a worktree that was correctly isolated but pinned to a superseded commit —
+verification run inside it produced confident, wrong results.
+
+**Before reporting any verification result, state the commit you read:**
+
+```bash
+echo "cwd=$(pwd) branch=$(git rev-parse --abbrev-ref HEAD) HEAD=$(git rev-parse HEAD)"
+```
+
+### Check properties, not actions
+
+The recurring defect behind several of these rules is an acceptance criterion that names an
+**action** instead of the **property** the action is meant to produce. The action can
+succeed while the property fails:
+
+| Criterion names an action | The property that actually matters |
+|---|---|
+| "renamed via `git mv`" | `git log --follow` reaches the pre-rename path |
+| "Declared Paths were listed" | nothing outside them is in the commit |
+| "one commit per preset" | the work is durably published |
+
+Two worked examples. A rename combined with a substantial rewrite in one commit records as
+add/delete once similarity falls under git's default 50% threshold — Phase 2 measured 45%,
+so `git mv` was used correctly and history was lost anyway; splitting the pure rename into
+its own commit is what preserves it. And a rebase can re-derive commits, so `git log
+--follow` must be **re-verified after any rebase or squash** rather than assumed to survive.
+
+**A phase is not complete until its branch is pushed to `origin`. Verify at Review
+dispatch, not at merge.** Phase 1 was reviewed, approved, and closed while its commits
+existed only on one local disk.

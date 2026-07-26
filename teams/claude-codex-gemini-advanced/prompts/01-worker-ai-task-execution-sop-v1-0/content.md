@@ -142,6 +142,23 @@ After completing a task or posting the evidence comment:
         - Create a commit with message: `<task-title> (epic: <short-id>)`
         - Include the commit hash in your completion comment
         devchain_add_epic_comment(task_id, "Committed: <commit_hash>")
+
+**Isolation mandate (development-standards §13) — applies to every commit you make:**
+
+* If your task runs in parallel with another task on this repo, work in a **separate git worktree**: `git worktree add <path-outside-repo> -b <branch> <base-commit>`. Remove it when the task completes — a leftover worktree becomes the stale checkout that misleads the next agent.
+* **Never `git add -A`.** Stage by explicit pathspec, restricted to your task's **Declared Paths**.
+* **Run the foreign-file assertion before committing, even inside a worktree** — a worktree stops other tasks colliding with you, but not you from staging a file your task never declared (untracked scratch files, `__pycache__`, generated output):
+
+```
+DECLARED='^(path/one\.md|path/two\.json)$'          # from the task's Declared Paths
+git diff --cached --name-only | grep -Ev "$DECLARED" \
+  && { echo "FOREIGN FILES STAGED — do not commit"; false; } || echo "clean"
+```
+
+* Re-run it against the commit afterwards (`git show --name-only --format='' HEAD`) — what landed is what matters, not what you intended to stage.
+* If the task has **no Declared Paths field**, do not guess. Ask the parent epic's owner to add one.
+* **State the revision you worked from** in your evidence comment: `git rev-parse HEAD` plus the branch and directory. Declaring paths does not tell a reviewer which revision you read, and a correctly-isolated but stale checkout produces confident, wrong results.
+* **Push your branch** — a task is not durably complete while its commits exist only on local disk. Plain fast-forward push; never force-push a published branch.
     Set the **review assignee** to the parent Epic's `agentName` (the agent who owns the parent epic).
        - Update(reassign) task to the parent epic's agent (Do NOT infer the reviewer from epic titles or context clues always use parent epic's agent)
        - In the update call you must also set status to `Review`.
