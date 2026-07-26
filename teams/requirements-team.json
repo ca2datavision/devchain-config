@@ -61,35 +61,35 @@
         "id": "provider-claude",
         "name": "claude"
       },
-      "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan",
+      "options": "--model claude-opus-5 --dangerously-skip-permissions --permission-mode plan",
       "instructions": "[[prompt:Requirements Lead — SOP (v1.0)]]",
       "temperature": null,
       "maxTokens": null,
       "providerConfigs": [
         {
-          "name": "default-claude-opus-4-5",
+          "name": "default-claude-opus-5",
           "providerName": "claude",
-          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+          "options": "--model claude-opus-5 --dangerously-skip-permissions --permission-mode plan"
         },
         {
           "name": "claude-regular",
           "providerName": "claude",
-          "options": "--model claude-opus-4-5 --dangerously-skip-permissions --permission-mode plan"
+          "options": "--model claude-opus-5 --dangerously-skip-permissions --permission-mode plan"
         },
         {
           "name": "claude-high",
           "providerName": "claude",
-          "options": "--model claude-opus-4-7 --dangerously-skip-permissions --permission-mode plan"
+          "options": "--model claude-fable-5 --dangerously-skip-permissions --permission-mode plan"
         },
         {
           "name": "codex-regular",
           "providerName": "codex",
-          "options": "--model=gpt-5.2 --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-terra --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "codex-high",
           "providerName": "codex",
-          "options": "--model=gpt-5.5 --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-sol --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "gemini-regular",
@@ -99,7 +99,7 @@
         {
           "name": "gemini-high",
           "providerName": "gemini",
-          "options": "--model gemini-3.1-pro --approval-mode yolo"
+          "options": "--model gemini-3.1-pro-preview --approval-mode yolo"
         }
       ]
     },
@@ -110,35 +110,35 @@
         "id": "a4c87d4f-b0ec-40df-8f9d-56e4ca678fae",
         "name": "codex"
       },
-      "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
+      "options": "--model=gpt-5.6-terra --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox",
       "instructions": "[[prompt:Technical Analyst — SOP (v1.0)]]",
       "temperature": null,
       "maxTokens": null,
       "providerConfigs": [
         {
-          "name": "default-gpt-5.2",
+          "name": "default-gpt-5.6-terra",
           "providerName": "codex",
-          "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-terra --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "claude-regular",
           "providerName": "claude",
-          "options": "--model claude-opus-4-5 --dangerously-skip-permissions"
+          "options": "--model claude-opus-5 --dangerously-skip-permissions"
         },
         {
           "name": "claude-high",
           "providerName": "claude",
-          "options": "--model claude-opus-4-7 --dangerously-skip-permissions"
+          "options": "--model claude-fable-5 --dangerously-skip-permissions"
         },
         {
           "name": "codex-regular",
           "providerName": "codex",
-          "options": "--model=gpt-5.2 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-terra --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "codex-high",
           "providerName": "codex",
-          "options": "--model=gpt-5.5 --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-sol --config model_reasoning_effort=\"high\" --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "gemini-regular",
@@ -148,7 +148,7 @@
         {
           "name": "gemini-high",
           "providerName": "gemini",
-          "options": "--model gemini-3.1-pro --approval-mode yolo"
+          "options": "--model gemini-3.1-pro-preview --approval-mode yolo"
         }
       ]
     },
@@ -172,22 +172,22 @@
         {
           "name": "claude-regular",
           "providerName": "claude",
-          "options": "--model claude-opus-4-5 --dangerously-skip-permissions"
+          "options": "--model claude-opus-5 --dangerously-skip-permissions"
         },
         {
           "name": "claude-high",
           "providerName": "claude",
-          "options": "--model claude-opus-4-7 --dangerously-skip-permissions"
+          "options": "--model claude-fable-5 --dangerously-skip-permissions"
         },
         {
           "name": "codex-regular",
           "providerName": "codex",
-          "options": "--model=gpt-5.2 --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-terra --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "codex-high",
           "providerName": "codex",
-          "options": "--model=gpt-5.5 --dangerously-bypass-approvals-and-sandbox"
+          "options": "--model=gpt-5.6-sol --dangerously-bypass-approvals-and-sandbox"
         },
         {
           "name": "gemini-regular",
@@ -197,7 +197,7 @@
         {
           "name": "gemini-high",
           "providerName": "gemini",
-          "options": "--model gemini-3.1-pro --approval-mode yolo"
+          "options": "--model gemini-3.1-pro-preview --approval-mode yolo"
         }
       ]
     }
@@ -208,14 +208,14 @@
       "name": "Requirements Lead",
       "profileId": "4b08fb30-fc5b-49b2-a418-569d51d97ec8",
       "description": "Orchestrates requirements analysis. Receives raw requirements, coordinates Technical and Domain Analysts, synthesizes findings into VRDs, manages validation cycles.",
-      "providerConfigName": "default-claude-opus-4-5"
+      "providerConfigName": "default-claude-opus-5"
     },
     {
       "id": "1e3ac103-e174-4593-97f4-18f0b8fe45ae",
       "name": "Technical Analyst",
       "profileId": "7a9a2385-1684-4034-9423-2246e097a74f",
       "description": "Analyzes codebase for technical context relevant to requirements. Identifies existing patterns, APIs, dependencies, and technical constraints to inform VRD acceptance criteria.",
-      "providerConfigName": "default-gpt-5.2"
+      "providerConfigName": "default-gpt-5.6-terra"
     },
     {
       "id": "a7926423-aa62-48c7-bd07-7e6286195579",

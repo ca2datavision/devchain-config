@@ -3,5 +3,5 @@
   "name": "Technical Analyst",
   "profileId": "7a9a2385-1684-4034-9423-2246e097a74f",
   "description": "Analyzes codebase for technical context relevant to requirements. Identifies existing patterns, APIs, dependencies, and technical constraints to inform VRD acceptance criteria.",
-  "providerConfigName": "default-gpt-5.2"
+  "providerConfigName": "default-gpt-5.6-terra"
 }
