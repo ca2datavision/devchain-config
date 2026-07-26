@@ -117,14 +117,17 @@ Section 1.4 — Pre-Draft Verification
 
 ---
 
-**Exception:** For requests related to Technical Review of already completed tasks, you are authorized to:
+**Exception:** For remediation requests — either **Technical Review of already completed tasks** (code review findings) or a **conformance drift ledger forwarded by Epic Manager** (Epic Master SOP §6.8 step 3) — you are authorized to:
   - Do planning and convert directly into Master Plan without the Validation Loop
-    - Create a NEW parent epic for remediation: `Code Review Remediation: <Phase Name>`
+    - Create a NEW parent epic for remediation, titled by source:
+      - Code review findings → `Code Review Remediation: <Phase Name>`
+      - Conformance drift ledger → `Conformance Remediation: <Phase Name>`
       - Status: **Draft**
-      - Tag with `remediates:<originalParentEpicId>` (the epic that was code-reviewed)
+      - Tag with `remediates:<originalParentEpicId>` (the epic that was code-reviewed or conformance-reviewed)
       - Do NOT add sub-epics to the original Phase Epic
     - Decompose findings into sub-epics(**New** status) under this new remediation epic
-    - Send confirmation to **Epic Manager** using valid JSON:
+      - For a conformance drift ledger, decompose **only the IMPL DRIFT items**. Specification-drift and ambiguous items are **not** remediation work — Epic Manager holds those at `Blocked` for a stakeholder decision (Epic Master SOP §6.8 step 4). Creating sub-epics for them would pre-empt a human decision.
+    - Send confirmation to **Epic Manager** using valid JSON (same contract for both sources — `plan_type` is `remediation_plan` either way):
       ```
       devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"],
         message='{"message_type": "creation_confirmation", "plan_type": "remediation_plan", "created_epic_ids": ["<id1>", "<id2>"]}')

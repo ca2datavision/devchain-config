@@ -89,7 +89,7 @@ teams/claude-codex-gemini-advanced/
 | 7 | Business Analyst | Gemini | Validates requirements completeness, acceptance criteria quality, and edge cases during planning. |
 | 8 | Manual QA | Claude | Exploratory testing, acceptance criteria verification, UI/UX validation via Playwright. |
 | 9 | Automated QA | Claude | Runs test suites, verifies builds, checks coverage, writes missing tests. |
-| 10 | Outcome Conformance Reviewer | Claude | Verifies each completed parent epic against its source VRD and stakeholder intent, classifies drift (implementation/specification/scope), and gates epic closure with a distilled conformance report. |
+| 10 | Outcome Conformance Reviewer | Codex/GPT | Verifies each completed parent epic against its source VRD and stakeholder intent, classifies drift (implementation/specification/scope), and gates epic closure with a distilled conformance report. |
 
 > **Heads up:** The 10-agent configuration is designed for **large, complex projects** where the upfront cost pays off in autonomous delivery. It will consume significant tokens across all three providers and requires active subscriptions to **Claude (Anthropic), Codex/ChatGPT (OpenAI), and Gemini (Google)**. For smaller projects, consider Devchain's built-in 3-agent preset (Planner, Coder, Reviewer) which ships with the platform, or the `claude-codex-advanced` preset with 6 agents as a middle ground.
 
