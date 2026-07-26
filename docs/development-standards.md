@@ -260,11 +260,31 @@ Both are specific to this repo's tooling and make a shared tree worse than it fi
 Its input is the task's **Declared Paths** field. Without that field the control has
 nothing to filter against, which is why the field is mandatory in the sub-epic template.
 
-**In this repo, prefer the executable: `scripts/pre-commit.sample`** — install it as a
-pre-commit hook and it blocks the commit outright (exercised against a real staged violation
-in Phase 4). The snippet below is retained as the portable fallback for repos that do not
-carry `scripts/`; a documented snippet is only as good as the reader's shell precedence,
-which is what the warning at the end of this section is about.
+**This assertion is agent-run, and cannot be automated as a repo hook.** Its input is the
+current task's Declared Paths — context that lives in the task, not in the repository — so a
+repo-global hook has nothing to filter against and would have to guess. Running it is a
+Worker SOP obligation, not something the tooling does for you. The pre-commit hook described
+below is a *different* control and does **not** perform this check.
+
+Run it unquieted, in an `if`/`else`, exactly as written below.
+
+> **Never gate on a silenced *negated* `grep`.** In this environment `grep` is a shell
+> function wrapping the binary, and a negated match with stdout discarded — `grep -qEv …` or
+> `grep -Ev … > /dev/null` — **returns non-zero regardless of input**, so with a violation
+> present the assertion takes the *clean* branch and prints `clean` while a foreign file is
+> staged. It is **stuck at 1, not inverted**: wrong in one direction only. Clean input is the
+> natural first thing to try, and there it agrees with you — which is why it survives testing.
+> Measured: the unquieted form below is correct; capturing to a variable or a file is correct;
+> a *positive* quieted match (`grep -qE …`) is also correct — it is the combination of `-v`
+> with discarded output that fails. CI is unaffected (no shim there), which means the hazard
+> is invisible in the environment you would reach for to check it.
+>
+> **The hazard is scoped to the interactive shell, not to hook execution.** The pre-commit
+> hook's own trigger uses `grep -qE` and is nonetheless sound: git runs hooks via `/bin/sh`,
+> where the shim is not defined and the real GNU grep resolves — verified in both directions
+> (`teams/` staged → fires; docs-only → does not). Same construct, different environment,
+> opposite verdict. So do not "fix" the hook's `-qE`, and do not conclude from it that this
+> warning is overcautious: it applies to the commands *you* type, not to what git executes.
 
 ```bash
 # exits non-zero if anything outside the task's Declared Paths is staged
@@ -295,6 +315,54 @@ fi
 > branch, which is the question this assertion asks. (`-m` also produces output, but it
 > lists contents relative to each parent separately — a different measurement, not a
 > stricter one.)
+
+### The pre-commit hook (`scripts/pre-commit.sample`)
+
+**What it enforces:** the **config-invariants suite** — `scripts/check-invariants.py` — and
+nothing else. It fires **only when a file under `teams/` or `scripts/` is staged**. A
+docs-only commit does not trigger it at all, including one that breaks a doc citation; those
+are caught by CI on push. Do not read a green commit as "the invariants were checked" unless
+your commit actually staged something in scope.
+
+**What it does not enforce:** the **foreign-file / Declared Paths assertion above.** That
+check needs the current task's Declared Paths, which a repo-global hook cannot know, so it
+cannot be automated this way and remains an agent obligation. An earlier revision of this
+section described the hook as the preferred implementation of that assertion; that was wrong
+in substance, not merely imprecise.
+
+**Enforcement status, honestly:** the hook is **opt-in until someone installs it**, and an
+uninstalled hook enforces nothing while looking like a control. The canonical install,
+verify, uninstall and bypass commands live in the header of `scripts/pre-commit.sample` —
+read them there rather than from a copy, so there is one source of truth. Installing once
+into the **common gitdir** covers every worktree. **CI on push is the enforced authority**;
+the hook is a faster local signal, not a replacement for it.
+
+**It checks the working tree, not the staged index — and those differ in both directions.**
+Git commits the *index*; the hook inspects the *working tree*. Because rule 2 above mandates
+staging by pathspec, partial staging is the norm here, not an edge case:
+
+| Situation | Result |
+|---|---|
+| Staged change is clean, unstaged WIP violates | **FALSE BLOCK** — refused for something you are not committing |
+| Staged change violates, working tree already fixed | **FALSE PASS** — committed; CI catches it on push |
+
+Remedies, in order of preference: commit everything when that is practical; expect the block
+and clear the WIP otherwise; or `git commit --no-verify` and let CI arbitrate. The last is
+legitimate here precisely because CI is the authority — but say so in the commit message.
+
+**A block may have nothing to do with your change.** The hook runs the *whole* suite, so a
+pre-existing failure — a day-45 stale model-pin audit, someone else's broken citation —
+blocks your unrelated commit. Three things make that diagnosable rather than baffling: the
+staleness message opens by saying it is **not caused by your change**; citation failures
+**name the offending file and line**; and the remedy commit for a stale audit adds a file
+under `docs/audits/`, which is **not** in the hook's trigger scope, so fixing it is never
+blocked by the thing you are fixing.
+
+**Worktrees help with one half of this only.** Isolation removes *tree-state* false blocks —
+another task's WIP is not in your working tree. It does **not** remove whole-suite blocks: a
+pristine worktree still runs the same suite against shared repository content, so a stale
+audit or a broken citation elsewhere blocks you there too. Those are answered by the
+self-identifying messages above, not by isolation.
 
 > **Use `if`/`else`, not `cmd && { …; false; } || echo …`.** That shorthand parses as
 > `(A && B) || C`: the `false` in the violation branch makes `||` fire, so the failure case
