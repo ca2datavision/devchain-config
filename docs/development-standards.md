@@ -144,8 +144,8 @@ devchain-config/
 │   │   ├── agents/
 │   │   ├── watchers/
 │   │   └── subscribers/
-│   ├── claude-codex-gemini-advanced.json  # Composed 9-agent preset
-│   ├── claude-codex-gemini-advanced/      # Decomposed 9-agent preset
+│   ├── claude-codex-gemini-advanced.json  # Composed 10-agent preset
+│   ├── claude-codex-gemini-advanced/      # Decomposed 10-agent preset
 │   │   └── (same structure)
 │   ├── requirements-team.json          # Composed 3-agent Requirements Team preset
 │   └── requirements-team/             # Decomposed Requirements Team preset

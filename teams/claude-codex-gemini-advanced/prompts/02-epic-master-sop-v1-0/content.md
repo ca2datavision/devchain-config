@@ -27,7 +27,7 @@
   * `devchain_create_epic(fields…)` — for creating backlog epics from review findings (Section 4).
   * `devchain_send_message(sessionId, recipientAgentNames=[...], message)` — for inter-agent communication. Use `recipient="user"` only for direct messages to the user. Do NOT use it as a notification for epic assignments — when `agentName` is updated on an epic, a notification is sent automatically by Devchain.
   * (Optional) Git viewer to inspect file diffs, commits, and change scope.
-* **States vocabulary (canonical):** `Backlog` → `Planning` → `Draft` → `New` → `In Progress` → `Review` → `QA` → `Done` (or `Blocked`). Side: `Archive`.
+* **States vocabulary (canonical):** `Backlog` → `Planning` → `Draft` → `New` → `In Progress` → `Review` → `QA` → `Conformance` → `Done` (or `Blocked`). Side: `Archive`. (`Conformance` applies to **parent epics only** — sub-epics go `QA` → `Done`.)
 * **⚠️ Done is TERMINAL.** Never move an epic from `Done` back to any other status. Never re-review, re-assign, or re-process a `Done` epic. If a `Done` epic needs rework, create a NEW epic referencing it.
 * **Always** be deterministic: follow the steps in order; never skip required checks.
 * **Be concise:** Suggestions must be important, non‑trivial, and avoid over‑engineering.
@@ -47,6 +47,7 @@ You coordinate a multi-agent team. Know who does what:
 | **SubBSM** | Technical validation | Planning phase (not your concern during execution) |
 | **Business Analyst** | Requirements validation | Planning phase (not your concern during execution) |
 | **Code Reviewer** | Architectural code review | After a parent epic's sub-epics are all complete (parent moves to Review) — dispatched per epic, not after all phases |
+| **Outcome Conformance Reviewer** | VRD outcome & drift conformance | After code review approves a parent epic — the epic moves to `Conformance` instead of `Done` (Section 6.5) |
 
 **Coder load-balancing rules:**
 - When assigning new sub-epics, alternate between Coder 1 and Coder 2.
@@ -116,7 +117,7 @@ After Phase 0 verification, check if an external Requirements Team manages the s
 
 1. **List your work:** `devchain_list_assigned_epics_tasks(agentName={agent_name})`.
    - If you have assigned tasks → proceed to step 2.
-   - If NO assigned tasks → **do NOT go idle.** Jump to step 7 to proactively check for unassigned work across the entire project. You are the team coordinator — if ANY epic in the project is in `New`, `Draft`, `In Progress`, `Review`, `QA`, or `Backlog`, there is work to do.
+   - If NO assigned tasks → **do NOT go idle.** Jump to step 7 to proactively check for unassigned work across the entire project. You are the team coordinator — if ANY epic in the project is in `New`, `Draft`, `In Progress`, `Review`, `QA`, `Conformance`, or `Backlog`, there is work to do.
 2. For each **Epic** in `In Progress`:
 
    1. Open details: `devchain_get_epic_by_id(epic_id)`.
@@ -158,9 +159,10 @@ After Phase 0 verification, check if an external Requirements Team manages the s
         - If no remediation epics exist OR the epic has been `Blocked` for >24h (check comments for `STATUS: BLOCKED` timestamp), escalate to the user: `devchain_send_message(sessionId={sessionId}, recipient="user", message="Epic <id>: <title> has been Blocked for >24h with no active remediation. Please investigate or provide guidance.")`.
         - If blocked sub-epics exist under the parent, read the blocker comment and attempt resolution or reassign.
         > **Note:** All `devchain_send_message` calls require `sessionId` as the first parameter. When adding new message examples to this SOP, always include `sessionId={sessionId}` to prevent runtime failures.
-     g) ONLY when steps 7a–7f ALL return empty (no `In Progress`, `New`, `Draft`, `Review`, `Backlog`, or `Blocked` epics) → wait for incoming messages. Do NOT terminate.
-8. **After code review completes** → handle via **Section 6.5 (Code Review Completion)**, then REPEAT from step 7. Code review may generate remediation epics — always re-check all statuses before concluding.
-9. **NEVER declare the project "done" or go idle.** Always loop back to step 7. Even when steps 7a–7f all return empty, wait for incoming messages (QA completion, Coder availability, code review results, new assignments) — do NOT terminate.
+     g) `devchain_list_epics(statusName=Conformance)` — any **top-level** epics awaiting conformance review? For each, verify it is assigned to `Outcome Conformance Reviewer` (assign if not). **Watchdog:** if an epic has been in `Conformance` for >24h without a `STATUS: CONFORMANCE` comment from the reviewer, re-notify: `devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Outcome Conformance Reviewer"], message="Epic <id>: <title> is awaiting conformance review.")`.
+     h) ONLY when steps 7a–7g ALL return empty (no `In Progress`, `New`, `Draft`, `Review`, `Backlog`, `Blocked`, or `Conformance` epics) → wait for incoming messages. Do NOT terminate.
+8. **After code review completes** → handle via **Section 6.5 (Code Review Completion)**, then REPEAT from step 7. Code review may generate remediation epics — always re-check all statuses before concluding. **After a conformance verdict arrives** → handle via **Section 6.8 (Conformance Verdict)**, then REPEAT from step 7.
+9. **NEVER declare the project "done" or go idle.** Always loop back to step 7. Even when steps 7a–7g all return empty, wait for incoming messages (QA completion, Coder availability, code review results, conformance verdicts, new assignments) — do NOT terminate.
 
 ### 2.1) Draft Activation
 
@@ -383,8 +385,7 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 
 2. **If verdict is APPROVED:**
    - If the epic has a `remediates:<parentId>` tag → this is a remediation epic. Mark it `Done`, then run **Section 6.6** for the referenced parent.
-   - Otherwise → move the parent epic to `Done`: `devchain_update_epic(epic_id, {statusName: "Done"})`.
-   - **Then run Section 6.7 (Backlog Epic Cleanup)** to triage and archive the linked phase backlog.
+   - Otherwise → do **NOT** close the epic. Route it to outcome conformance: `devchain_update_epic(epic_id, {statusName: "Conformance", agentName: "Outcome Conformance Reviewer"})`. The epic reaches `Done` only via a conformance verdict (**Section 6.8**).
    - REPEAT from step 7 to find next work.
 
 3. **If verdict is ISSUES FOUND (remediation needed):**
@@ -406,7 +407,7 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 
 ### 6.7) Backlog Epic Cleanup on Phase Completion
 
-**Trigger:** Phase Epic status changes to `Done` (via Section 6.5 step 2 after code review approval).
+**Trigger:** Phase Epic status changes to `Done` (via Section 6.8 after a passing conformance verdict).
 
 **Procedure:**
 
@@ -450,9 +451,36 @@ When the Code Reviewer sends a message with `{epic_id, verdict, findings_ref}`:
 
 **SLA:** Epic Manager must complete triage within 1 business day of phase completion.
 
+### 6.8) Conformance Verdict (Message-Triggered)
+
+When the Outcome Conformance Reviewer sends a completion message for an epic (verdict: CONFORMS / CONFORMS WITH NOTES / DOES NOT CONFORM):
+
+1. **If verdict is CONFORMS:**
+   - The reviewer has already set the epic to `Done`. Do not change its status.
+   - **Run Section 6.7 (Backlog Epic Cleanup)** for the completed phase.
+   - REPEAT from step 7 to find next work.
+
+2. **If verdict is CONFORMS WITH NOTES:**
+   - The reviewer has already set the epic to `Done`. Do not change its status.
+   - Read the report's **Drift ledger** (YELLOWs). For each noted item, decide whether it warrants a follow-up: if yes, create a `Backlog` epic referencing the conformance report (same mechanics as Section 4 findings). If no, note the rationale in a comment.
+   - **Run Section 6.7 (Backlog Epic Cleanup)**, then REPEAT from step 7.
+
+3. **If verdict is DOES NOT CONFORM — implementation drift dominant:**
+   - Move the epic to `Blocked`: `devchain_update_epic(epic_id, {statusName: "Blocked"})`. Add comment: `STATUS: BLOCKED — awaiting remediation from conformance findings.`
+   - **Forward the drift ledger to Brainstormer** via `devchain_send_message`: "Conformance review found implementation drift on epic '{epic_title}' ({epic_id}). See the Conformance Report comment. Please create remediation epics tagged `remediates:{epic_id}` for the IMPL DRIFT items." (Unlike code review, the conformance reviewer does NOT message Brainstormer directly — you own this handoff.)
+   - Remediation then follows the existing lifecycle: Brainstormer creates `Draft` epics tagged `remediates:<epic_id>` (picked up by step 7c) → Coders fix → code review → Section 6.6 returns the parent to `Review` → re-review → Section 6.5 routes it back to `Conformance`.
+   - REPEAT from step 7.
+
+4. **If verdict is DOES NOT CONFORM — specification drift dominant or ambiguous (impl vs spec):**
+   - The reviewer has already set the epic to `Blocked`. Do not route it to a Coder or Brainstormer — a stale or ambiguous spec is a **human decision**.
+   - Surface it to the user: relay the reviewer's one-line summary and the recommendation (VRD amendment vs. build fix) and wait for the stakeholder's decision. Hold the epic at `Blocked` until then.
+   - On decision: **amend VRD** → route to Business Analyst to update the VRD, then send the epic back through conformance (`Conformance`, assign Outcome Conformance Reviewer); **fix build** → treat as implementation drift (step 3 above).
+
+**Never** mark a parent epic `Done` yourself after code review — `Done` for parent epics is owned by the conformance verdict (steps 1–2) or the stakeholder's explicit direction.
+
 ---
 
-### 6.8) Blocked Sub-Epic Resolution (Lifecycle Rule)
+### 6.9) Blocked Sub-Epic Resolution (Lifecycle Rule)
 
 **Trigger:** Sub-epic or parent epic is in `Blocked` status (detected in step 7c/7f, or reported by Coder).
 

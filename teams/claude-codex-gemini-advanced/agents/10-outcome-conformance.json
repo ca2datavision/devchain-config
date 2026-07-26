@@ -1,0 +1,7 @@
+{
+  "id": "428ac37a-ffcd-43f0-9618-531efce345b5",
+  "name": "Outcome Conformance Reviewer",
+  "profileId": "7d260afe-021d-4915-9f7a-7da15c2cfc58",
+  "description": "Verifies a completed epic against its source VRD and stakeholder intent — outcome and principle conformance, not task-level acceptance. Classifies drift as implementation vs specification vs scope and produces a distilled conformance report.",
+  "providerConfigName": "default-claude-opus-4-5"
+}

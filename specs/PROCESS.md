@@ -1,7 +1,7 @@
 # Specs Flow Process
 
 > **Version:** 1.0
-> **Last Updated:** 2026-03-29
+> **Last Updated:** 2026-07-10
 > **Purpose:** Define the requirements intake and validation pipeline for all DevChain projects.
 
 ---
@@ -118,7 +118,7 @@ When archiving a local-only document, create a summary/metadata markdown with:
 
 ---
 
-## Two-Gate Review Process
+## Three-Gate Review Process
 
 ### Gate 1: Intake Triage (Business Analyst)
 
@@ -143,6 +143,22 @@ When archiving a local-only document, create a summary/metadata markdown with:
 
 **Output:** Approved epics ready for Coder assignment
 
+### Gate 3: Outcome Conformance (Outcome Conformance Reviewer)
+
+**Trigger:** All child tasks of an epic are `Done` and code review has approved the epic (status `Conformance`)
+
+**Process:**
+1. Follow the epic's `Source:` link to the VRD; reconstruct the intended outcome and its principles
+2. Compare the built epic against them, holistically — not per-task
+3. Classify drift (implementation / specification / scope) and post a distilled Conformance Report
+
+**Output:**
+- CONFORMS → epic closes (`Done`)
+- CONFORMS WITH NOTES → epic closes, YELLOWs logged for Epic Manager follow-up
+- DOES NOT CONFORM → build fix (implementation drift) or stakeholder decision (specification drift / ambiguity)
+
+This closes the backward-traceability loop: the `Source:` link on every epic is finally *read* at the end of the line.
+
 ---
 
 ## Manual Handoff Definitions
@@ -155,6 +171,7 @@ When archiving a local-only document, create a summary/metadata markdown with:
 | 4 | Brainstormer | Creates epics from VRD | Draft epics in DevChain |
 | 5 | Brainstormer | Adds epic IDs to VRD | VRD updated with traceability |
 | 6 | EM | Approves epics | Epics ready for execution |
+| 7 | Outcome Conformance Reviewer | Verifies completed epic against source VRD | Conformance verdict; epic closed or routed for fix/decision |
 
 ---
 
