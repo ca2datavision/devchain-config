@@ -113,11 +113,31 @@ def run(cmd, cwd=None):
 
 
 def repo_root():
-    """Resolve the checkout root. Scripts must run from INSIDE a checkout."""
-    proc = run(["git", "rev-parse", "--show-toplevel"], cwd=str(HERE))
-    if proc.returncode != 0:
-        return None
-    return pathlib.Path(proc.stdout.strip())
+    """Resolve the checkout root from THIS FILE's location. Never via git.
+
+    Deriving it with `git rev-parse --show-toplevel` is not safe here, and the
+    failure is not hypothetical -- it shipped:
+
+        Git exports GIT_DIR when it runs a hook, and leaves GIT_WORK_TREE
+        unset. In that state `--show-toplevel` resolves against the CURRENT
+        DIRECTORY rather than discovering the repo. Called with cwd set to this
+        script's own directory, it returned `<root>/scripts`, so every path
+        below it (`<root>/scripts/teams`) was missing and the run died. In the
+        main checkout GIT_DIR is unset and the same call was correct, so the
+        bug was invisible outside worktrees -- which is where the agents work.
+
+    This layout is fixed (`<root>/scripts/<this file>`), so the parent of the
+    script's directory IS the root. No subprocess, no environment dependence,
+    and nothing for GIT_DIR to influence: the bad outcome is unreachable rather
+    than merely avoided.
+
+    The layout assertion keeps the old guarantee that a copied-out script fails
+    loudly instead of silently operating on the wrong tree.
+    """
+    root = HERE.parent
+    if (root / "compose.py").is_file() and (root / "teams").is_dir():
+        return root
+    return None
 
 
 def check_retired(root, ref):
