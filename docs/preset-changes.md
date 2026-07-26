@@ -140,7 +140,7 @@ Both scripts write into the tree:
 
 - `compose.py` rewrites `teams/<preset>.json` **in place**.
 - `decompose.py` computes `out_dir = json_path.parent / json_path.stem`
-  (`decompose.py:127`) and then `shutil.rmtree(out_dir)` (`decompose.py:129`).
+  (`decompose.py:202`) and then `shutil.rmtree(out_dir)` (`decompose.py:205`).
 
 > **⚠️ `python3 decompose.py teams/<preset>.json` DELETES the tracked directory
 > `teams/<preset>/`.** It is not read-only. On a clean tree it is recoverable from git; with
@@ -157,6 +157,25 @@ git archive <commit> teams/<preset> teams/<preset>.json | tar -x -C "$SCRATCH"
 
 `git archive` also guarantees you are testing a *committed* state rather than whatever
 happens to be in the working tree.
+
+**This hazard is now mechanically guarded — but only where git can see it.** `guard_rmtree()`
+(`decompose.py:128`, called immediately before the `shutil.rmtree` at `decompose.py:205`)
+refuses with a non-zero exit when the output directory is git-tracked **and** has local
+changes; untracked (`??`) and ignored (`!!`) entries count as changes, because those are
+exactly what git cannot restore afterwards. `--force` overrides. Four cases, and the fourth
+is the one to remember:
+
+| Situation | Behaviour |
+|---|---|
+| tracked + dirty, git available | **refused** — the guard |
+| tracked + clean | proceeds; git can restore it |
+| untracked directory | proceeds, presumed scratch — the fully unrecoverable path, left open **deliberately** so throwaway use stays frictionless |
+| **git absent, or target outside a repository** | **proceeds unguarded**, tracked-dirty content included |
+
+The fourth case is not "behaviour is unchanged" — it is **the protection is absent**. Run
+`decompose.py` where `git` is not on `PATH` and a tracked, dirty directory is deleted with no
+refusal and no warning. Nothing has regressed; the guard simply never runs. A guard
+implemented inside a tool feels like it travels with the tool, and this one does not.
 
 ## 6. Exact-boundary matching and single-pass substitution
 
@@ -275,6 +294,11 @@ python3 -c "import re,pathlib,sys; print('\n'.join(sorted(set(
   re.findall(r'--model[= ]([^\s\"]+)', pathlib.Path(sys.argv[1]).read_text())))))" \
   teams/<preset>.json
 ```
+
+**Audit freshness is judged by FILENAME, never by mtime.** `docs/audits/YYYY-MM-DD.md`
+entries are dated from the filename because a git checkout does not preserve mtime — CI
+clones fresh, so every file looks written seconds ago and an mtime-based check would report
+a three-year-old audit as current. Enforced by `scripts/check-invariants.py --audit-staleness`.
 
 ## 9. Edit raw text, never `json.load` / `json.dump`
 

@@ -249,6 +249,12 @@ Both are specific to this repo's tooling and make a shared tree worse than it fi
 Its input is the task's **Declared Paths** field. Without that field the control has
 nothing to filter against, which is why the field is mandatory in the sub-epic template.
 
+**In this repo, prefer the executable: `scripts/pre-commit.sample`** — install it as a
+pre-commit hook and it blocks the commit outright (exercised against a real staged violation
+in Phase 4). The snippet below is retained as the portable fallback for repos that do not
+carry `scripts/`; a documented snippet is only as good as the reader's shell precedence,
+which is what the warning at the end of this section is about.
+
 ```bash
 # exits non-zero if anything outside the task's Declared Paths is staged
 DECLARED='^(docs/preset-changes\.md|docs/development-standards\.md)$'
