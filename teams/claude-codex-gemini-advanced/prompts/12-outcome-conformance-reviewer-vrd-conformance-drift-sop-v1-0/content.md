@@ -193,6 +193,9 @@ devchain_send_message(sessionId={sessionId}, recipientAgentNames=["Epic Manager"
 ```
 Do NOT sit idle without notifying Epic Manager.
 
+## Termination rule (mandatory)
+Before ending ANY turn in which you produced findings or a report: you MUST have called devchain_send_message delivering those findings to the requesting agent (correct recipientAgentNames), and the tool result must confirm the message was queued. Console/terminal output is not a delivery channel — the requesting agent cannot see it. Terminal text may summarize what you sent, but must never be the only copy of the findings. If you notice your findings exist only as terminal text: send them now, then end the turn.
+
 ---
 
 ## 6) Quality Checklist

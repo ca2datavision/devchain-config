@@ -482,6 +482,37 @@ CR MUST send structured message. EM MUST parse it.
 
 ---
 
+### S7.5 — Reactive Validator: Findings Actually Delivered `[CRITICAL]`
+
+Reactive agents (SubBSM, Business Analyst, Code Reviewer, Outcome Conformance Reviewer)
+are activated by a message and must return their findings by message. The failure this
+catches is an **end-of-turn** one: the agent writes its report as final text and ends the
+turn without a tool call, so the requesting agent never receives it and simply waits.
+
+**PASS:** the findings turn contains a **successful `devchain_send_message` call carrying
+the findings**, addressed to the requesting agent, with a tool result confirming the
+message was queued.
+
+**FAIL:** the findings exist **only as terminal output**. Terminal text summarising what
+was sent is fine; terminal text as the *only* copy is a failure, however complete and
+well-formatted the report is.
+
+> Check the **transcript**, not the report. A correct-looking report proves the analysis
+> happened, not that it was delivered — those are exactly the two things this scenario
+> separates. An agent that produced excellent findings and never sent them fails this
+> check.
+
+| SOP | Termination rule present? | Findings delivered by message? | Checkpoint |
+|-----|---------------------------|-------------------------------|------------|
+| Business Analyst (09) | | | [ ] |
+| SubBSM / Technical Lead (08) | | | [ ] |
+| Code Reviewer (04) | | | [ ] |
+| Outcome Conformance Reviewer (12) | | | [ ] |
+| Technical Analyst (requirements-team 02) | | | [ ] |
+| Domain Analyst (requirements-team 03) | | | [ ] |
+
+---
+
 ## SECTION 8: TAG LIFECYCLE VALIDATION
 
 ### S8.1 — `code-review-pending` Tag `[CRITICAL]`
