@@ -243,6 +243,11 @@ established at all.
 
 ## Findings file convention
 
+When your findings prose cites repo code, prefer symbol anchors (`<file>.py::<symbol>`)
+over line numbers — see "How to cite code in docs" in [preset-changes.md](preset-changes.md).
+Existing audit files are exempt from the citation check and are never retro-edited; this
+applies to new prose you write.
+
 Write each run to `docs/audits/YYYY-MM-DD.md`:
 
 ```markdown

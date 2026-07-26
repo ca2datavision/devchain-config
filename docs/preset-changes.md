@@ -150,8 +150,8 @@ is `$SCRATCH/teams/<preset>` — not `$SCRATCH/<preset>`.
 Both scripts write into the tree:
 
 - `compose.py` rewrites `teams/<preset>.json` **in place**.
-- `decompose.py` computes `out_dir = json_path.parent / json_path.stem`
-  (`decompose.py:202`) and then `shutil.rmtree(out_dir)` (`decompose.py:205`).
+- `decompose.py::decompose` `out_dir = json_path.parent / json_path.stem` computes the
+  output directory, and then `decompose.py::decompose` `shutil.rmtree(out_dir)` deletes it.
 
 > **⚠️ `python3 decompose.py teams/<preset>.json` DELETES the tracked directory
 > `teams/<preset>/`.** It is not read-only. On a clean tree it is recoverable from git; with
@@ -169,9 +169,10 @@ git archive <commit> teams/<preset> teams/<preset>.json | tar -x -C "$SCRATCH"
 `git archive` also guarantees you are testing a *committed* state rather than whatever
 happens to be in the working tree.
 
-**This hazard is now mechanically guarded — but only where git can see it.** `guard_rmtree()`
-(`decompose.py:128`, called immediately before the `shutil.rmtree` at `decompose.py:205`)
-refuses with a non-zero exit when the output directory is git-tracked **and** has local
+**This hazard is now mechanically guarded — but only where git can see it.**
+`decompose.py::guard_rmtree`, called immediately before `decompose.py::decompose`
+`shutil.rmtree(out_dir)`, refuses with a non-zero exit when the output directory is
+git-tracked **and** has local
 changes; untracked (`??`) and ignored (`!!`) entries count as changes, because those are
 exactly what git cannot restore afterwards. `--force` overrides. Four cases, and the fourth
 is the one to remember:
@@ -368,3 +369,61 @@ Two habits, both learned the hard way:
 *Bootstrap precedent: Phases 4 and 5 ran concurrently in separate worktrees as the first
 application of this isolation control, before its rule text existed — the rule below was
 written from what actually worked rather than from theory.*
+
+---
+
+## How to cite code in docs
+
+**Cite a symbol, never a line number.** Line numbers rot on every insertion above them,
+silently and invisibly. Symbols rot only on rename, which is rarer and — because a rename
+breaks the citation loudly — self-announcing.
+
+```
+decompose.py::decompose                                  symbol only
+decompose.py::decompose `shutil.rmtree(out_dir)`         symbol + anchored snippet
+```
+
+- **Format:** `<file>.py::<symbol>`. The symbol must match `^\s*(def|class)\s+<symbol>\b`
+  in that file. Decorated definitions match — the decorator sits on the previous line.
+- **Anchored snippets:** a backtick snippet placed **on the same line, immediately after**
+  the citation must appear verbatim in that file. Use one when you are pointing at a
+  specific statement rather than a whole function.
+- **Cite the definition alone** when the definition *is* the subject —
+  `decompose.py::guard_rmtree` needs no snippet.
+- **Writing about the scheme rather than using it?** Use metasyntactic placeholders, or the
+  check will try to resolve your example as a real citation:
+  - legacy form → `file.py:NNN` or `<file>.py:<line>` (placeholder digits never match `\d+`)
+  - symbol form → `<file>.py::<symbol>` (the angle bracket breaks the `\w+` the check
+    expects after `::`)
+
+  This paragraph is the reason the convention exists. The first draft of this very note
+  illustrated the format with a literal line-number example and a bare metasyntactic
+  filename, and the check flagged all three occurrences — one as a legacy citation, two as
+  citations naming a file that does not exist. The rewrite then tripped again, because the
+  sentence *explaining* the mistake quoted the offending forms verbatim. Prefer a **real,
+  resolving** example wherever you can; reach for placeholders only when the point is the
+  shape rather than the target, and describe a bad form rather than reproducing it.
+
+Enforced by `python3 scripts/check-invariants.py --doc-citations`, as its own CI step. A
+legacy line-number citation anywhere in scope is RED; so is an unresolvable file or an
+unknown symbol, each with its own message naming the expected format.
+
+**Scope: `docs/` recursively, excluding `docs/audits/`.** Audit files are append-forever
+records that legitimately quote tool output containing `file:line` text, and are never
+retro-edited to satisfy a linter. The exemption is bounded rather than open-ended: parking
+living guidance under `audits/` to dodge the check would be plainly visible in review.
+
+### Two stated residuals — green does not mean these were checked
+
+1. **Multi-line snippets are not validated.** Only a snippet on the *same line* as its
+   citation is anchored and verified. A snippet in a following fenced block or on the next
+   line is not associated with the citation and is not checked at all. If you anchor that
+   way, a green run tells you nothing about it.
+2. **Snippet-anywhere.** The snippet is matched against the whole file, not against the
+   cited symbol's body. A citation whose snippet has since moved into a *different*
+   function still passes.
+
+As of this writing **no citation in this repository relies on either residual** — every
+anchored snippet here sits inside the function it cites, verified when they were migrated.
+That is worth preserving: if this sentence ever stops being true, someone will have had to
+make it false deliberately, and the check will not tell them.
