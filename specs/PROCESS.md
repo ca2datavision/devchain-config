@@ -145,6 +145,8 @@ When archiving a local-only document, create a summary/metadata markdown with:
 
 ### Gate 3: Outcome Conformance (Outcome Conformance Reviewer)
 
+**Scope:** applies only to projects created from the claude-codex-gemini-advanced (10-agent) preset. Only that preset ships the `Conformance` status and the Outcome Conformance Reviewer agent — projects on other presets end the epic lifecycle at Gate 2 plus code review.
+
 **Trigger:** All child tasks of an epic are `Done` and code review has approved the epic (status `Conformance`)
 
 **Process:**
