@@ -150,9 +150,15 @@ def main(argv=None):
     failed = []
 
     # --- invariants 1, 2, 4 -------------------------------------------------
+    # Tree selection must match invariant 3 exactly. verify-presets.py defaults
+    # to --ref HEAD (the COMMITTED tree), so passing no selector here would
+    # silently check a different tree than invariant 3 scans. In CI the two
+    # coincide (checkout == HEAD == working tree) and the mismatch is invisible;
+    # in the pre-commit hook it is not -- the hook exists to judge uncommitted
+    # work, and would have skipped round-trip drift in exactly the staged change
+    # it was invoked to police. Always pass an explicit selector.
     cmd = [sys.executable, str(VERIFY)]
-    if args.ref:
-        cmd += ["--ref", args.ref]
+    cmd += ["--ref", args.ref] if args.ref else ["--dir", str(root)]
     print("[1,2,4] round-trip (sources->artifact) / dangling pins / allowlist")
     proc = run(cmd, cwd=str(root))
     for line in (proc.stdout or "").rstrip("\n").split("\n"):
