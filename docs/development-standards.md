@@ -268,13 +268,16 @@ below is a *different* control and does **not** perform this check.
 
 Run it unquieted, in an `if`/`else`, exactly as written below.
 
-> **Never gate on a silenced `grep`.** In this environment `grep` is a shell function
-> wrapping the binary, and it **inverts its exit status when stdout is discarded**: with a
-> violation present, `grep -Ev … > /dev/null` and `grep -qEv …` both return non-zero, so the
-> assertion takes the *clean* branch and prints `clean` while a foreign file is staged.
-> Measured: the unquieted form below is correct; capturing to a variable or a file is
-> correct; `-q` and `> /dev/null` are not. CI is unaffected (no shim there), which means the
-> hazard is invisible in the environment you would reach for to check it.
+> **Never gate on a silenced *negated* `grep`.** In this environment `grep` is a shell
+> function wrapping the binary, and a negated match with stdout discarded — `grep -qEv …` or
+> `grep -Ev … > /dev/null` — **returns non-zero regardless of input**, so with a violation
+> present the assertion takes the *clean* branch and prints `clean` while a foreign file is
+> staged. It is **stuck at 1, not inverted**: wrong in one direction only. Clean input is the
+> natural first thing to try, and there it agrees with you — which is why it survives testing.
+> Measured: the unquieted form below is correct; capturing to a variable or a file is correct;
+> a *positive* quieted match (`grep -qE …`) is also correct — it is the combination of `-v`
+> with discarded output that fails. CI is unaffected (no shim there), which means the hazard
+> is invisible in the environment you would reach for to check it.
 >
 > **The hazard is scoped to the interactive shell, not to hook execution.** The pre-commit
 > hook's own trigger uses `grep -qE` and is nonetheless sound: git runs hooks via `/bin/sh`,
