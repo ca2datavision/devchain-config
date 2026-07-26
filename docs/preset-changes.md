@@ -111,11 +111,15 @@ real defect. **Always say which direction you mean, and run the strong one.** Id
 both — they fail on different things.
 
 ```bash
-# strong: sources -> artifact (see item 5 for why this must be out-of-tree)
-cp -r teams/<preset> "$SCRATCH/<preset>"
-python3 compose.py "$SCRATCH/<preset>"
-cmp "$SCRATCH/<preset>.json" teams/<preset>.json && echo "sources match artifact"
+# strong: sources -> artifact. Must be out-of-tree (item 5 explains why).
+SCRATCH=$(mktemp -d)
+git archive HEAD teams/<preset> | tar -x -C "$SCRATCH"     # lands at $SCRATCH/teams/<preset>
+python3 compose.py "$SCRATCH/teams/<preset>"
+cmp "$SCRATCH/teams/<preset>.json" teams/<preset>.json && echo "sources match artifact"
 ```
+
+Note the `teams/` prefix is preserved by `git archive`, so the path passed to `compose.py`
+is `$SCRATCH/teams/<preset>` — not `$SCRATCH/<preset>`.
 
 ## 5. Verify out-of-tree ⚠️
 
@@ -208,11 +212,21 @@ The obvious invocations do **not** run as written in this environment. Verified 
 
 | CLI | Missing flag | Result |
 |---|---|---|
-| `codex exec` | `--skip-git-repo-check` | `Not inside a trusted directory`, **exit 1** |
+| `codex exec` | `--skip-git-repo-check` | `Not inside a trusted directory`, **exit 1** — *but see below* |
 | `codex exec` | stdin not redirected | blocks indefinitely — always add `</dev/null` |
 | `gemini` | `--skip-trust` | `not running in a trusted directory`, **exit 55** |
 
-Neither is a model error. Copy-pasteable block for all three providers:
+None of these is a model error.
+
+> **The codex row is trust-registry dependent, so do not use it as a diagnostic.** codex
+> consults its own trusted-projects list. From a directory it does not recognise the call
+> fails with exit 1 as above; from *any worktree of an already-trusted repo* — which is
+> exactly the setup "Working in parallel" below recommends — it succeeds with exit 0 and no
+> flag. Both behaviours were reproduced. Always pass `--skip-git-repo-check` so the result
+> does not depend on invisible local state, and never infer anything about a model from its
+> presence or absence.
+
+Copy-pasteable block for all three providers:
 
 ```bash
 claude -p "Reply with the single word: ok" --model <claude-model>
@@ -251,18 +265,35 @@ python3 -c "import re,pathlib,sys; print('\n'.join(sorted(set(
 
 **Catches:** byte-identity failures from reflowed formatting.
 
-`providerConfigs` entries are hand-maintained **single-line** JSON. A `load`/`dump`
-round-trip reflows them onto multiple lines and breaks round-trip byte-identity, even
-though the parsed data is unchanged.
+A `json.load` → `json.dump` round-trip re-serialises the whole file to the dumper's
+formatting. Where that differs from what is on disk, byte-identity breaks even though the
+parsed data is unchanged.
 
-Edit the file as text — `re.sub` on the raw string, or a targeted string replacement.
-Confirm the formatting survived:
+**The rule is "preserve whatever formatting the file already uses" — not "make it
+single-line".** Formatting is a per-file convention here, not a tooling invariant: neither
+`decompose.py` nor `compose.py` special-cases `providerConfigs`. As of this writing:
+
+| Preset | `providerConfigs` entries | On-disk style |
+|---|---:|---|
+| `claude-codex-gemini-advanced` | 77 | **single-line** (one object per line) |
+| `requirements-team` | 21 | standard multi-line `indent=2` |
+| `claude-codex-advanced` | 0 | no `providerConfigs` at all |
+
+So edit the file as text — `re.sub` on the raw string, or a targeted replacement — and
+confirm the style survived by comparing against the pre-change count rather than against a
+fixed expectation:
 
 ```bash
-grep -c '^    { "name"' teams/<preset>/profiles/<profile>.json   # expect one per entry
+# count single-line entries before and after your edit; the two numbers must match
+grep -c '^    { "name"' teams/<preset>/profiles/<profile>.json
 ```
 
-The same rule applies to any tool that "formats on save" — disable it for these files.
+A result of `0` is correct for a multi-line preset and does **not** indicate a problem —
+what matters is that the number is unchanged. The authoritative check is still item 4's
+sources→artifact round-trip, which catches reflow regardless of which style a file uses.
+
+The same rule applies to any editor or hook that "formats on save" — disable it for these
+files.
 
 ---
 
