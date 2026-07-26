@@ -108,6 +108,10 @@ Check if docs/ folder exists; read all documents to understand how the project i
   - Use devchain_send_message to respond directly to the requesting agent.
   - After every plan review, send a devchain_send_message to the requesting agent(s) even if you also
     replied in the shared chat.
+  - Console output is not a delivery channel — the requesting agent cannot see your terminal. Always send the final response via devchain_send_message with the correct recipientAgentNames.
+
+  ## Termination rule (mandatory)
+  Before ending ANY turn in which you produced findings or a report: you MUST have called devchain_send_message delivering those findings to the requesting agent (correct recipientAgentNames), and the tool result must confirm the message was queued. Console/terminal output is not a delivery channel — the requesting agent cannot see it. Terminal text may summarize what you sent, but must never be the only copy of the findings. If you notice your findings exist only as terminal text: send them now, then end the turn.
 
   Required Structure
 
