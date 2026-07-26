@@ -156,6 +156,141 @@ def check_retired(root, ref):
     return violations
 
 
+# --- doc citation resolution ----------------------------------------------
+#
+# Doc citations name a SYMBOL, not a line number: `file.py::symbol`.
+# Line numbers rot on every insertion above them and rot silently; symbols rot
+# only on rename, which is rarer and shows up in the rename itself. Two stale
+# `decompose.py:N` citations shipped in one day before this check existed.
+#
+# A citation immediately followed ON THE SAME LINE by an inline backtick
+# snippet is ANCHORED: that snippet must appear verbatim in the cited file.
+# Multi-line / indirect snippet association is OUT OF SCOPE in v1 — a reader
+# who anchors a multi-line snippet and sees green must not conclude it was
+# checked. (Residual recorded in the scheme note; T2 documents it.)
+#
+# Scope: docs/ recursive, EXCLUDING docs/audits/. Audits are append-forever
+# records that legitimately quote tool output containing file:line text and are
+# never retro-edited to satisfy a linter. The exemption is bounded and
+# review-visible: parking living guidance under audits/ to dodge this check
+# would be obvious in review.
+#
+# Fenced blocks ARE scanned — a real legacy token lives inside one.
+
+CITATION_FORMAT_HINT = (
+    "expected `file.py::symbol` (symbol must be a `def`/`class` in that file); "
+    "an inline `snippet` on the SAME line after the citation must appear "
+    "verbatim in the file"
+)
+
+# Legacy line-number citation. The (?:,\d+)* group is load-bearing: the
+# comma-compound form `decompose.py:202,205` is ONE match but TWO citations.
+# A walker counting match-starts reports 6 across the current tree and has
+# silently missed 2.
+LEGACY_CITATION_RX = re.compile(r"[\w.-]+\.py:\d+(?:,\d+)*")
+
+# Symbol-anchored citation.
+SYMBOL_CITATION_RX = re.compile(r"([\w.-]+\.py)::(\w+)")
+
+# Teaching anti-patterns use placeholder digits and must NEVER trip:
+#   file.py:NNN   <file>.py:<line>
+# Both are excluded structurally by requiring \d+ after the colon.
+
+DOC_SCAN_ROOT = "docs"
+DOC_SCAN_EXCLUDE = "docs/audits"
+
+
+def _resolve_cited_file(name, root):
+    """repo root, then scripts/, then a repo-wide basename search."""
+    for cand in (root / name, root / "scripts" / name):
+        if cand.is_file():
+            return cand
+    hits = [p for p in root.rglob(name)
+            if p.is_file() and ".git" not in p.parts]
+    return hits[0] if len(hits) >= 1 else None
+
+
+def _anchored_snippet(line, end):
+    """Inline `snippet` immediately after a citation on the same line."""
+    i = end
+    if i < len(line) and line[i] == "`":      # citation itself was backticked
+        i += 1
+    while i < len(line) and line[i] in " \t,;:.()—-":
+        i += 1
+    if i < len(line) and line[i] == "`":
+        close = line.find("`", i + 1)
+        if close > i + 1:
+            return line[i + 1:close]
+    return None
+
+
+def scan_doc_citations(docs_dir, resolve_root, exclude=None):
+    """Return [(relpath, lineno, kind, detail)] for every citation defect."""
+    out = []
+    docs_dir = pathlib.Path(docs_dir)
+    if not docs_dir.is_dir():
+        return out
+    for path in sorted(docs_dir.rglob("*.md")):
+        if exclude and str(path).startswith(str(exclude)):
+            continue
+        try:
+            text = path.read_text(errors="replace")
+        except OSError:
+            continue
+        try:
+            rel = str(path.relative_to(resolve_root))
+        except ValueError:
+            rel = str(path)
+        for lineno, line in enumerate(text.split("\n"), 1):
+            for m in LEGACY_CITATION_RX.finditer(line):
+                token = m.group()
+                refs = re.findall(r"\d+", token[token.index(".py:"):])
+                for ref in refs:                       # compound => one each
+                    out.append((rel, lineno, "legacy-line-number",
+                                "%s cites line %s — line numbers rot silently; "
+                                "%s" % (token, ref, CITATION_FORMAT_HINT)))
+            for m in SYMBOL_CITATION_RX.finditer(line):
+                fname, symbol = m.group(1), m.group(2)
+                target = _resolve_cited_file(fname, resolve_root)
+                if target is None:
+                    out.append((rel, lineno, "unresolvable-file",
+                                "%s names a file that does not exist in the "
+                                "repo; %s" % (m.group(), CITATION_FORMAT_HINT)))
+                    continue
+                body = target.read_text(errors="replace")
+                if not re.search(r"^\s*(def|class)\s+%s\b" % re.escape(symbol),
+                                 body, re.M):
+                    out.append((rel, lineno, "unknown-symbol",
+                                "%s: no `def %s` or `class %s` in %s; %s"
+                                % (m.group(), symbol, symbol, fname,
+                                   CITATION_FORMAT_HINT)))
+                    continue
+                snip = _anchored_snippet(line, m.end())
+                if snip is not None and snip not in body:
+                    out.append((rel, lineno, "missing-anchored-snippet",
+                                "%s anchors snippet `%s` which does not appear "
+                                "verbatim in %s; %s"
+                                % (m.group(), snip, fname,
+                                   CITATION_FORMAT_HINT)))
+    return out
+
+
+def check_doc_citations(root, ref=None):
+    """Own CI step. Scans the working tree (or a ref via a temp checkout)."""
+    if ref:
+        tmp = tempfile.mkdtemp(prefix="citation-ref-")
+        proc = subprocess.run(
+            "git archive %s | tar -x -C %s" % (ref, tmp),
+            shell=True, cwd=str(root), capture_output=True, text=True)
+        if proc.returncode != 0:
+            return [("<git>", 0, "git-archive-failed", proc.stderr.strip())]
+        base = pathlib.Path(tmp)
+    else:
+        base = root
+    return scan_doc_citations(base / DOC_SCAN_ROOT, base,
+                              exclude=base / DOC_SCAN_EXCLUDE)
+
+
 def audit_entries(root, ref):
     """Return (dates, ignored, dir_present) for docs/audits/.
 
@@ -296,6 +431,129 @@ def audit_self_test():
     return ok_all
 
 
+def citation_self_test():
+    """Seed one fixture per defect class and assert each is caught DISTINCTLY.
+
+    Six fixtures must go RED, one must stay GREEN. The green one is not
+    padding: it is the only fixture proving the check does NOT fire on the
+    teaching anti-patterns (`file.py:NNN`) that documentation of this very
+    scheme has to contain. A check with no negative fixture is one regex slip
+    away from flagging every doc that explains the rule it enforces.
+    """
+    print("CITATION SELF-TEST — six classes must go RED, one must stay GREEN\n")
+    results = []
+    with tempfile.TemporaryDirectory(prefix="citation-selftest-") as tmp:
+        base = pathlib.Path(tmp)
+        (base / "scripts").mkdir()
+        (base / "scripts" / "sample-mod.py").write_text(
+            "def real_symbol():\n"
+            "    marker = 'VERBATIM_SNIPPET'\n"
+            "    return marker\n"
+        )
+        docs = base / "docs"
+        docs.mkdir()
+        (docs / "audits").mkdir()
+
+        cases = [
+            ("unknown symbol", "unknown-symbol",
+             "See `sample-mod.py::no_such_symbol` for details.\n"),
+            ("missing anchored snippet", "missing-anchored-snippet",
+             "See `sample-mod.py::real_symbol` `NOT_IN_THE_FILE` here.\n"),
+            ("legacy simple form", "legacy-line-number",
+             "The call at sample-mod.py:2 does the work.\n"),
+            ("legacy COMMA-COMPOUND", "legacy-line-number",
+             "It computes then deletes (sample-mod.py:2,3).\n"),
+            ("unknown file", "unresolvable-file",
+             "See `no-such-file.py::whatever` for details.\n"),
+            ("in-fence legacy", "legacy-line-number",
+             "```bash\n# see sample-mod.py:2 for the call\n```\n"),
+        ]
+        for i, (label, kind, body) in enumerate(cases):
+            f = docs / ("case%02d.md" % i)
+            f.write_text(body)
+            found = scan_doc_citations(docs, base, exclude=docs / "audits")
+            mine = [x for x in found if x[0] == str(f.relative_to(base))]
+            kinds = sorted({k for _, _, k, _ in mine})
+            ok = kinds == [kind]
+            detail = "caught as %s" % (kinds or "NOTHING")
+            if label.startswith("legacy COMMA"):
+                ok = ok and len(mine) == 2          # one token, TWO citations
+                detail += " x%d (must be 2)" % len(mine)
+            named = all(CITATION_FORMAT_HINT.split(";")[0] in d
+                        for _, _, _, d in mine) if mine else False
+            results.append((label, ok and named,
+                            detail + ("" if named else " — MESSAGE OMITS FORMAT")))
+            f.unlink()
+
+        # negative fixture: placeholder digits must NOT trip
+        f = docs / "placeholders.md"
+        f.write_text(
+            "Never write file.py:NNN or <file>.py:<line> — use symbols.\n"
+            "Correct: `sample-mod.py::real_symbol` `VERBATIM_SNIPPET`\n"
+        )
+        found = [x for x in scan_doc_citations(docs, base, exclude=docs / "audits")
+                 if x[0] == str(f.relative_to(base))]
+        results.append(("placeholder digits do NOT trip", not found,
+                        "%d finding(s)" % len(found)))
+        f.unlink()
+
+        # audits/ exemption: a legacy token there must be ignored
+        (docs / "audits" / "2026-07-26.md").write_text(
+            "tool output: decompose.py:202,205\n")
+        found = [x for x in scan_doc_citations(docs, base, exclude=docs / "audits")
+                 if "audits" in x[0]]
+        results.append(("docs/audits/ exempt (append-forever records)",
+                        not found, "%d finding(s)" % len(found)))
+
+        # --- RESIDUAL DEMONSTRATION — not a defect class -------------------
+        # NOT one of the RED fixtures above. This case PASSES while being
+        # semantically wrong, which is the point: the snippet check is
+        # file-wide, so a snippet that lives in a DIFFERENT function than the
+        # one cited still resolves. Recording it as a live demonstration
+        # rather than a sentence in a note, so the hole is visible with its
+        # exact shape. Multi-line/indirect association is out of scope in v1
+        # for the same reason.
+        (base / "scripts" / "two-funcs.py").write_text(
+            "def cited_function():\n"
+            "    return 1\n"
+            "\n"
+            "def other_function():\n"
+            "    unrelated = 'SNIPPET_IN_THE_WRONG_FUNCTION'\n"
+        )
+        f = docs / "residual.md"
+        f.write_text("See `two-funcs.py::cited_function` "
+                     "`SNIPPET_IN_THE_WRONG_FUNCTION` here.\n")
+        leaked = [x for x in scan_doc_citations(docs, base,
+                                                exclude=docs / "audits")
+                  if x[0].endswith("residual.md")]
+        f.unlink()
+        # CONTROL — without it "green" is satisfiable by a scanner that found
+        # nothing at all, which is exactly how this block reported the residual
+        # as confirmed while the fixtures above were silently broken. The same
+        # doc shape with a snippet genuinely absent from the file MUST trip.
+        f = docs / "residual_control.md"
+        f.write_text("See `two-funcs.py::cited_function` "
+                     "`ABSENT_FROM_THE_FILE_ENTIRELY` here.\n")
+        control = [x for x in scan_doc_citations(docs, base,
+                                                 exclude=docs / "audits")
+                   if x[0].endswith("residual_control.md")]
+        f.unlink()
+        residual_live = (not leaked) and bool(control)
+
+    ok = True
+    for label, passed, detail in results:
+        print("  [%s] %-46s %s" % ("PASS" if passed else "FAIL", label, detail))
+        ok = ok and passed
+    print("\n  RESIDUAL (v1, known, NOT a defect class): the snippet check is "
+          "file-wide,\n  so a snippet living in a DIFFERENT function than the "
+          "one cited still passes.\n  Demonstrated live above: %s"
+          % ("confirmed present — such a citation resolves GREEN"
+             if residual_live else
+             "NOT reproduced — scope may have narrowed; update the note"))
+    print("\nCITATION SELF-TEST %s" % ("PASSED" if ok else "FAILED"))
+    return 0 if ok else 1
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--ref", default=None,
@@ -305,6 +563,11 @@ def main(argv=None):
     ap.add_argument("--audit-staleness", action="store_true",
                     help="run ONLY the model-pin audit recency check "
                          "(its own CI step; see docs/model-pin-audit.md)")
+    ap.add_argument("--doc-citations", action="store_true",
+                    help="run ONLY the doc citation resolution check: every "
+                         "`file.py::symbol` in docs/ must resolve, and legacy "
+                         "`file.py:LINE` citations are rejected. "
+                         "docs/audits/ is exempt (append-forever records).")
     args = ap.parse_args(argv)
 
     root = repo_root()
@@ -314,6 +577,39 @@ def main(argv=None):
               "(e.g. after actions/checkout), not from a copied directory.",
               file=sys.stderr)
         return 2
+
+    # --- doc citation resolution --------------------------------------------
+    # Its own mode and its own CI step, for the same reason as staleness: a
+    # rotted doc citation is not a broken change, and merging the two would
+    # make stale documentation look like a defective commit.
+    if args.doc_citations:
+        print("Doc citation resolution — %s" % (args.ref or "working tree"))
+        print("repo: %s" % root)
+        print("scope: %s/ recursive, EXCLUDING %s/ "
+              "(append-forever records that legitimately quote file:line "
+              "tool output)\n" % (DOC_SCAN_ROOT, DOC_SCAN_EXCLUDE))
+        findings = check_doc_citations(root, args.ref)
+        by_kind = {}
+        for rel, lineno, kind, detail in findings:
+            by_kind.setdefault(kind, []).append((rel, lineno, detail))
+        for kind in sorted(by_kind):
+            print("  [%s] %d" % (kind, len(by_kind[kind])))
+            for rel, lineno, detail in by_kind[kind]:
+                print("      %s:%s  %s" % (rel, lineno, detail))
+        if not findings:
+            print("  ok   every citation resolves; no legacy line-number "
+                  "citations")
+        st_ok = True
+        if not args.no_self_test:
+            print()
+            st_ok = citation_self_test() == 0
+        print("\n" + "=" * 62)
+        if findings or not st_ok:
+            print("RESULT: FAIL — %d citation finding(s)%s"
+                  % (len(findings), "" if st_ok else ", self-test FAILED"))
+            return 1
+        print("RESULT: PASS — citations resolve; self-test green")
+        return 0
 
     # --- audit staleness ----------------------------------------------------
     # Deliberately its OWN mode and its own CI step, never folded into the

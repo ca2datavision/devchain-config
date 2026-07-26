@@ -56,3 +56,18 @@ jobs:
       # failure message opens by saying it is not caused by your change.
       - name: Check model-pin audit freshness
         run: python3 scripts/check-invariants.py --audit-staleness
+
+      # ALSO a separate step, for the same diagnostic reason. A rotted doc
+      # citation is not a broken change, and a reader who sees "config
+      # invariants" go red will look at their config, not their prose.
+      #
+      # Doc citations name a SYMBOL (`file.py::symbol`), never a line number.
+      # Line numbers rot on every insertion above them and rot SILENTLY -- two
+      # went stale in a single day before this existed, each caught only by a
+      # human reading closely. Symbols rot on rename, which is rarer and shows
+      # up in the rename itself.
+      #
+      # docs/audits/ is exempt: those are append-forever records that quote
+      # tool output containing real file:line text and are never retro-edited.
+      - name: Check doc citation resolution
+        run: python3 scripts/check-invariants.py --doc-citations
