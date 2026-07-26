@@ -14,6 +14,10 @@ Numbering is 1:1 with the source backlog item `071ce95e`.
 states the failure it catches, then the command that catches it. Commands assume the repo
 root as the working directory unless stated otherwise.
 
+Each item below deliberately checks a **property**, not that a command was run — see the
+properties-not-actions table in [development-standards.md §13](development-standards.md#13-parallel-task-isolation)
+for why that distinction matters and where checks written the other way have failed.
+
 ---
 
 ## 1. Substitution-only proof
