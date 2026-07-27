@@ -269,15 +269,21 @@ below is a *different* control and does **not** perform this check.
 Run it unquieted, in an `if`/`else`, exactly as written below.
 
 > **Never gate on a silenced *negated* `grep`.** In this environment `grep` is a shell
-> function wrapping the binary, and a negated match with stdout discarded — `grep -qEv …` or
-> `grep -Ev … > /dev/null` — **returns non-zero regardless of input**, so with a violation
-> present the assertion takes the *clean* branch and prints `clean` while a foreign file is
-> staged. It is **stuck at 1, not inverted**: wrong in one direction only. Clean input is the
-> natural first thing to try, and there it agrees with you — which is why it survives testing.
-> Measured: the unquieted form below is correct; capturing to a variable or a file is correct;
-> a *positive* quieted match (`grep -qE …`) is also correct — it is the combination of `-v`
-> with discarded output that fails. CI is unaffected (no shim there), which means the hazard
-> is invisible in the environment you would reach for to check it.
+> function, and a negated match with stdout discarded — `grep -qEv …` or
+> `grep -Ev … > /dev/null` — **returns `NOT(the pattern matched anywhere)` instead of the
+> correct `-v` answer.** It is wrong on exactly one input shape: a list where the pattern
+> matches *some* lines but not others. That is the only shape a Declared-Paths gate ever sees
+> in anger, and it is the shape that makes the assertion print `clean` while a foreign file is
+> staged.
+>
+> Earlier revisions of this note said "inverts", then "returns non-zero regardless of input".
+> Both were generalised from inputs where the pattern always matched. See
+> [Shell instrument hazards](#shell-instrument-hazards) for the measured mechanism, the full
+> table, and why four characterisations of this program were each true of something.
+>
+> The unquieted form below is correct; so is capturing to a variable or a file, counting with
+> `-c`/`-vc`, and any *positive* quieted match (`grep -qE …`). It is `-v` **combined with
+> discarded output** that fails.
 >
 > **The hazard is scoped to the interactive shell, not to hook execution.** The pre-commit
 > hook's own trigger uses `grep -qE` and is nonetheless sound: git runs hooks via `/bin/sh`,
@@ -391,6 +397,135 @@ verification run inside it produced confident, wrong results.
 ```bash
 echo "cwd=$(pwd) branch=$(git rev-parse --abbrev-ref HEAD) HEAD=$(git rev-parse HEAD)"
 ```
+
+### Shell instrument hazards
+
+This section exists because one shell builtin was characterised **four different ways in one
+day**, each characterisation true of something and none true of the program. It is written to
+be re-derived, not believed: every number below is reproducible with the commands shown.
+
+#### The rule
+
+**Suppressed output is safe. Suppressed output *plus* `-v` is not.** Capture to a file or a
+variable, or count with `-c` / `-vc`, and compare the value.
+
+The reason, now known: the divergence lands on **mixed input** — a list where the pattern
+matches some lines and not others. That is precisely what a Declared-Paths gate sees when a
+foreign file is staged, and nothing else. Toy probes over one-line inputs miss it every time.
+
+#### The mechanism
+
+`grep` here is a shell function that execs the Claude binary as `ugrep` with `-G`:
+
+```
+grep () {
+    ...
+    ( exec -a ugrep "$_cc_bin" -G --ignore-files --hidden -I --exclude-dir=.git ... "$@" )
+}
+```
+
+With `-v` **and** suppressed output, the exit status becomes `NOT(pattern matched anywhere)` —
+the inversion is applied to the *status* rather than to the *selection*. Correct `-v`
+semantics are "did any line fail to match"; this answers "did any line match", negated.
+
+That explains why it agrees on the easy inputs: when the pattern matches nothing, both answers
+are 0; when it matches everything, both are 1. Only mixed input separates them.
+
+#### The evidence
+
+Pattern `^docs/`. Correct `-v` exit is 0 when at least one line is *not* matched.
+
+| form | none | all | some | expected | verdict |
+|---|---|---|---|---|---|
+| `grep -qEv` | 0 | 1 | **1** | 0/1/0 | **diverges on `some`** |
+| `grep -Ev … > /dev/null` | 0 | 1 | **1** | 0/1/0 | **diverges on `some`** |
+| `grep -Ev … > file` | 0 | 1 | 0 | 0/1/0 | agrees |
+| `out=$(grep -Ev …)` | 0 | 1 | 0 | 0/1/0 | agrees |
+| `n=$(grep -cEv …)` | 0 | 1 | 0 | 0/1/0 | agrees |
+| `grep -qE` (positive) | 1 | 0 | 0 | 1/0/0 | agrees |
+
+Count *values* agree too: `none` 2/2, `all` 0/0, `some` 1/1 (shim vs `/usr/bin/grep`).
+
+**The three input shapes are applied to the recommended forms as well, not only the broken
+one.** Validating a safe form only on inputs where the bug cannot appear is the exact sampling
+error that produced two of the wrong characterisations below.
+
+**`/bin/sh` control** — every form above agrees with `/usr/bin/grep` on all three inputs.
+`/bin/sh -c 'type grep'` reports `/usr/bin/grep`: the function is a bash-interactive
+construct and does not exist there. This upgrades "hooks are immune" from asserted to
+measured — git runs hooks via `/bin/sh`.
+
+**Environment fingerprint** (re-capture before trusting the table on a different machine):
+
+```
+command grep --version   -> grep (GNU grep) 3.8
+/usr/bin/grep --version  -> grep (GNU grep) 3.8
+grep --version           -> ugrep 7.5.0        <- the SHIM reporting on itself
+ugrep on PATH            -> NOT FOUND
+shell                    -> bash 5.2.15
+```
+
+**`grep --version` answers for the shim, not for the binary it dispatches to.** When naming a
+tool, run `command grep --version`.
+
+#### CI is unaffected — which is the trap
+
+There is no shim in CI. Anyone who reproduces the hazard there concludes it does not exist.
+It is present exactly where controls get authored and absent exactly where they get tested.
+
+#### The hook's `-qE` is sound — do not "fix" it
+
+`scripts/pre-commit.sample` gates on `grep -qE`, which looks like the forbidden form and is
+not. Two independent reasons: it is a **positive** match, so it never enters the divergent
+path; and hooks run under `/bin/sh`, where the shim is undefined. Both measured above.
+
+#### History — four characterisations, each true of something
+
+| claim | true of | wrong because |
+|---|---|---|
+| "ugrep quiet mode" | the shim's self-reported version | no `ugrep` binary is installed |
+| "`/usr/bin/grep` is ugrep" | the shim | that path is GNU grep 3.8 |
+| "any quieted grep inverts" | negated forms | positive quieted matches are correct |
+| "stuck at 1 regardless of input" | inputs where the pattern matched | returns 0 when it matches nothing |
+
+A fifth in the same family, on a different subject: "the version line silently reports
+current" — actually loud, and only for ordered comparison.
+
+**Three agent-shell non-reproductions were recorded before the mechanism was known** (two
+during the original investigation, one appended by the Business Analyst). All three used
+single-line inputs where the pattern matched nothing, so all three returned the correct answer
+**by coincidence**. Arithmetic: 3 non-reproductions, 3 explained, 0 outstanding.
+
+It resolved when someone **read the source** rather than probing behaviour, and the confirming
+probe was the first one built to *discriminate between hypotheses* rather than confirm one.
+Probing tells you what happened; only the source tells you why — and without the why you
+cannot tell which observations generalise.
+
+One further caution from the same investigation: a transcript that displays output from one
+run and an exit status from another proves nothing about either. Capture both from the same
+invocation, into named variables.
+
+#### Repo sweep
+
+Run verbatim; the trailing filter excludes the two documents that teach the rule by quoting it:
+
+```bash
+grep -rnE 'grep +-[a-zA-Z]*q[a-zA-Z]*v|grep +-[a-zA-Z]*v[a-zA-Z]* [^|]*> */dev/null' \
+  --include='*.sh' --include='*.sample' --include='*.py' --include='*.md' . \
+  | grep -v 'development-standards.md\|preset-changes.md'
+```
+
+Result at the commit that introduced this section: **0 occurrences.**
+
+#### Appendable measurements
+
+Add an entry when you measure this on a new machine, shell, or binary version. Include the
+fingerprint block — a result without one cannot be compared against another.
+
+1. **Business Analyst**, agent shell — non-reproduction on single-line input; explained above
+   as a `none`-shape coincidence.
+2. **Coder 1**, agent shell + `/bin/sh`, bash 5.2.15 / GNU grep 3.8 / shim ugrep 7.5.0 — the
+   six-form × three-input table above, including the safe forms on all three shapes.
 
 ### Check properties, not actions
 

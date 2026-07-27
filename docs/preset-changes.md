@@ -64,8 +64,15 @@ else
 fi
 ```
 
-Two details, each of which has already shipped broken once:
+Three details, each of which has already shipped broken once:
 
+- **Never suppress the output of a *negated* `grep` you are gating on.** In this environment
+  `grep -qEv …` and `grep -Ev … > /dev/null` return `NOT(the pattern matched anywhere)`, which
+  is wrong on exactly one input shape — a file list where the pattern matches *some* lines and
+  not others. That is the only shape this assertion ever sees when a foreign file is staged.
+  Capture to a file or variable, or count with `-c`/`-vc`. Mechanism, evidence and the four
+  superseded characterisations: [development-standards.md §13 → Shell instrument
+  hazards](development-standards.md#shell-instrument-hazards).
 - **`if`/`else`, not `cmd && echo "BAD" || echo "ok"`.** That shorthand parses as
   `(A && B) || C` and always exits 0 — usable by a human reading output, useless to
   anything that checks a status code.
