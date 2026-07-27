@@ -5,7 +5,10 @@
 # docs/setup.md point here rather than repeating it, so there is one copy to
 # keep true.
 #
-# HOOK-VERSION: 2  (bump when this file changes; see "Staleness" below)
+# HOOK-VERSION: 3
+# (the value above must stay ALONE on its line — a trailing comment made it
+#  unparseable to an end-anchored regex, which then yielded empty on BOTH sides
+#  and compared EQUAL. Bump it whenever this file changes; see "Staleness".)
 #
 # Install — COPY, not a symlink. Idempotent; re-run to update:
 #   cp scripts/pre-commit.sample "$(git rev-parse --git-common-dir)/hooks/pre-commit" \
@@ -95,6 +98,60 @@ if git diff --cached --name-only | grep -qE '^(teams/|scripts/)'; then
         echo "      python3 compose.py teams/<preset>"
         echo "  Bypass (discouraged):  git commit --no-verify"
         exit 1
+    fi
+
+    # --- staleness self-check (WARN ONLY) -------------------------------
+    # Placed INSIDE the trigger, i.e. AFTER the early exit, deliberately: the
+    # hook's currency matters exactly when its verdict matters. On a docs-only
+    # commit this hook checks nothing, so drift is harmless by construction and
+    # a warning there would be pure noise. Do not move this above the early
+    # exit without revisiting that trade-off.
+    #
+    # WARN, never fail:
+    #   (a) "installed newer than this worktree's source" is NORMAL worktree
+    #       life -- a worktree on an older branch is not an error, so failing
+    #       would be wrong in one of the two directions.
+    #   (b) The stale-audit hard-fail precedent does NOT transfer: that remedy
+    #       is committable content that can ride the blocked commit. This
+    #       remedy is an environment action (reinstall), which a blocked commit
+    #       cannot carry. CI backstops the invariants either way.
+    #   Warn-fatigue is an accepted residual, bounded by a one-line remedy.
+    #
+    # set -e FOOTGUN: this file runs under `set -e`. Every probe below is in a
+    # condition context or has explicit `|| true`. A bare grep that found no
+    # HOOK-VERSION line would exit 1 and kill the hook -- turning a warn-only
+    # check into a commit blocker.
+    #
+    # Greps here obey the repo's own gating-grep rule: positive match or
+    # captured output only, never negated-and-quieted. This is the first new
+    # code written after that rule and is meant to be its exemplar.
+    hook_ver() {
+        # captured output, positive match; never gates on exit status
+        sed -n 's/^# HOOK-VERSION:[[:space:]]*\([0-9][0-9]*\)[[:space:]]*$/\1/p' "$1" 2>/dev/null | head -1
+    }
+    src="$root/scripts/pre-commit.sample"
+    if [ -r "$src" ]; then                      # absent (e.g. on main) -> quiet no-op
+        same_content=no
+        if cmp -s "$0" "$src"; then same_content=yes; fi
+        iv="$(hook_ver "$0" || true)"
+        sv="$(hook_ver "$src" || true)"
+        numeric=no
+        case "$iv$sv" in
+            ''|*[!0-9]*) numeric=no ;;
+            *) [ -n "$iv" ] && [ -n "$sv" ] && numeric=yes ;;
+        esac
+        if [ "$same_content" = yes ]; then
+            :                                    # identical -> silent
+        elif [ "$numeric" != yes ]; then
+            # unparseable on either side is NEVER treated as equal
+            echo "pre-commit: hook version unknown (installed='$iv' source='$sv') — cannot compare; re-run the install line in the hook header" >&2
+        elif [ "$iv" -lt "$sv" ]; then
+            echo "pre-commit: hook differs from this worktree's source (installed older) — re-run the install line in the hook header" >&2
+        elif [ "$iv" -gt "$sv" ]; then
+            echo "pre-commit: this worktree's source is behind the installed hook (worktree on an older branch?) — no action needed" >&2
+        else
+            echo "pre-commit: content differs but versions match — the source's HOOK-VERSION was likely not bumped; bump it and reinstall" >&2
+        fi
     fi
 fi
 
