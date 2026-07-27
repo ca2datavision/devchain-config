@@ -343,6 +343,12 @@ read them there rather than from a copy, so there is one source of truth. Instal
 into the **common gitdir** covers every worktree. **CI on push is the enforced authority**;
 the hook is a faster local signal, not a replacement for it.
 
+**The staleness guarantee, narrowly:** an **installed** hook announces when it differs from
+this worktree's source. An **absent** hook announces nothing — fresh clones have no hook
+until the header's install line is run, and absence produces the same observable as a
+healthy hook: silence. CI on push is the backstop either way. Nothing self-checking can
+close this — the thing positioned to notice has to exist in order to notice.
+
 **It checks the working tree, not the staged index — and those differ in both directions.**
 Git commits the *index*; the hook inspects the *working tree*. Because rule 2 above mandates
 staging by pathspec, partial staging is the norm here, not an edge case:

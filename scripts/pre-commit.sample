@@ -5,7 +5,7 @@
 # docs/setup.md point here rather than repeating it, so there is one copy to
 # keep true.
 #
-# HOOK-VERSION: 3
+# HOOK-VERSION: 4
 # (the value above must stay ALONE on its line — a trailing comment made it
 #  unparseable to an end-anchored regex, which then yielded empty on BOTH sides
 #  and compared EQUAL. Bump it whenever this file changes; see "Staleness".)
@@ -60,6 +60,13 @@
 #   and still CHECKS -- it is merely an older version, with CI on push as the
 #   authority. A dangling one does not run at all and says nothing. A stale
 #   check beats an absent one.
+#
+#   THE GUARANTEE, NARROWLY: an INSTALLED hook announces when it differs from
+#   this worktree's source. An ABSENT hook announces nothing -- fresh clones
+#   have no hook until the install line above is run, and absence produces the
+#   same observable as a healthy hook: silence. CI on push is the backstop
+#   either way. Nothing self-checking can close this: the thing positioned to
+#   notice has to exist in order to notice.
 #
 # Bypass for a single commit (use sparingly, and never for a config change):
 #   git commit --no-verify
