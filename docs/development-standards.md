@@ -468,6 +468,34 @@ shell                    -> bash 5.2.15
 **`grep --version` answers for the shim, not for the binary it dispatches to.** When naming a
 tool, run `command grep --version`.
 
+#### Re-deriving this table: run the probe INLINE
+
+**The shim is a bash function, and functions are not inherited by child shells.** A probe
+written to a file and run as `bash probe.sh` measures `/usr/bin/grep`, not the shim:
+
+```
+inline               type grep -> grep is a function      <- shim present
+bash probe.sh        type grep -> grep is /usr/bin/grep   <- shim ABSENT
+bash -c 'declare -F grep'  -> no
+```
+
+**This failure is silent and it fails toward the pleasant answer.** A scripted probe returns
+a clean table in which every form agrees — which is also what a correct system returns. The
+first version of this table was produced that way and had to be thrown out; it was caught only
+because a divergence was expected and did not appear. **A reader expecting agreement has
+nothing to catch them.** Start the transcript with `type grep` and confirm it prints
+`function`.
+
+**The table authenticates its own setup.** Real `grep` is correct on all three shapes, so if
+both columns were real `grep`, every row would agree. A run showing `shim=1, real=0` on `some`
+is therefore *only* producible with the shim active — reproducing the divergence proves you
+measured the right program. The contrapositive is the useful half: **a run where `some` agrees
+for the negated forms means either the shim is absent, or it has been fixed** — investigate
+which before believing the numbers, and before appending a non-reproduction below.
+
+The fingerprint and the divergence answer different questions and neither replaces the other:
+the divergence proves *a* shim was active; the fingerprint records *which one*.
+
 #### CI is unaffected — which is the trap
 
 There is no shim in CI. Anyone who reproduces the hazard there concludes it does not exist.
